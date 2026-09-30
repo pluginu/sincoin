@@ -1,5 +1,11 @@
 # SIN
 
+** Visit Sin Website **
+
+for more info, the code for the website is also ran by this repo with index.html for review and audit 
+
+[SIN Coin](https://sincoin.vip) 
+
 **DISCOVER • FOLLOW • SUPPORT**
 
 SIN is a planned suite of tools that helps people discover adult entertainers and creators faster, wherever they browse or search. Browser extensions, plugins for AI agents, and other search integrations will connect people with relevant creators across platforms, including OnlyFans.
