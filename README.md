@@ -13,6 +13,7 @@ For creators, SIN aims to make it easier to be found through searchable profiles
 1. Download or clone this repository into a folder you will keep on your computer.
 2. Open `chrome://extensions` in Chrome 120 or later and enable **Developer mode**.
 3. Click **Load unpacked** and select the repository folder containing `manifest.json`.
+   If loading reports a reserved `__pycache__` name, remove that generated cache folder and retry. Python helpers live in `scripts/`; use the commands below with `-B` to avoid generating bytecode caches.
 4. Pin **sin69** from Chrome’s extensions menu, then refresh any already-open website tabs.
 5. Click the extension to toggle highlighting or add your own rules.
 
@@ -62,10 +63,10 @@ Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitiv
 To merge new names, put one entertainer per line in `new_entertainers.txt`, then run:
 
 ```sh
-python3 merge_entertainers.py new_entertainers.txt
+python3 -B scripts/merge_entertainers.py new_entertainers.txt
 ```
 
-The script updates `entertainers.txt` next to the script, keeps existing names first, and removes duplicates from both lists. Matching ignores capitalization, extra whitespace, and commas, so `Angela White` and `angela, white` count as the same name. Blank lines are skipped and names are saved in comma-separated format. It requires only Python 3. Use `--main path/to/entertainers.txt` to update a different main file.
+The script updates `entertainers.txt` in the repository root, keeps existing names first, and removes duplicates from both lists. Matching ignores capitalization, extra whitespace, and commas, so `Angela White` and `angela, white` count as the same name. Blank lines are skipped and names are saved in comma-separated format. It requires only Python 3. Use `--main path/to/entertainers.txt` to update a different main file.
 
 If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
 
@@ -76,7 +77,7 @@ Public receiving addresses and supported networks are embedded directly in `inde
 
 ### Local payment wallets
 
-`generate_wallets.py` contains setup and run instructions and prints only public addresses. It creates Bitcoin mainnet (native SegWit), Solana, and Ethereum wallets, and reuses them on subsequent runs. USDC/USDT use the receiving address for their respective network.
+`scripts/generate_wallets.py` contains setup and run instructions and prints only public addresses. It creates Bitcoin mainnet (native SegWit), Solana, and Ethereum wallets, and reuses them on subsequent runs. USDC/USDT use the receiving address for their respective network.
 
 Private keys live only in `~/.local/share/sincoin/wallets/activation.wallet-private.json`, outside the repository and website, with owner-only permissions. This file is unencrypted: keep a secure backup before accepting funds. It contains Bitcoin WIF, an Ethereum hex private key, and a Solana 64-byte keypair array for wallet recovery/import. Never share or upload it. `.gitignore` also excludes `*.wallet-private.json`, its backups, `.wallets/`, and `.venv/`. Copy only the public output into the HTML if deliberately changing wallets; the page never loads local wallet files.
 
@@ -163,4 +164,4 @@ Another Creator, https://www.pornhub.com/model/example, https://example.org
 
 URLs may include or omit `https://`. Labeled handles use a registry alias followed by a colon, e.g. `ig: @example`, `twitter: example`, or `fansly: @example`. Bare `@handles` are ambiguous and must be labeled. Platforms with multiple profile formats require a full profile URL; no account ownership is inferred. HTTP and HTTPS websites outside the registry are supported too. Commas separate fields; encode literal commas in URLs as `%2C`.
 
-Run `python3 merge_entertainers.py entertainers.new.txt` to merge. Existing names receive new links without creating duplicate names or discarding old links. Twitter URLs normalize to X. Invalid or ambiguous links stop the merge with a filename and line number before the main file is changed. Names without links remain supported, and the extension highlights only the name.
+Run `python3 -B scripts/merge_entertainers.py entertainers.new.txt` to merge. Existing names receive new links without creating duplicate names or discarding old links. Twitter URLs normalize to X. The merge script enforces one owner per URL across the entire file: assigning an existing URL to a different name aborts the merge without changing the file. Ownership checks ignore HTTP/HTTPS, www, trailing slashes, fragments, common tracking parameters, and known domain aliases (such as Twitter/X). Handle case is ignored for X, Instagram, Facebook, and OnlyFans; meaningful website paths and query parameters remain distinct. Equivalent links for the same name are combined. Invalid or ambiguous links stop the merge with a filename and line number before the main file is changed. Names without links remain supported, and the extension highlights only the name.

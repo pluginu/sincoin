@@ -3,7 +3,7 @@
 
 Setup: python3 -m venv .venv
        .venv/bin/pip install embit==0.8.0 eth-account==0.13.7 solders==0.26.0
-Run:   .venv/bin/python generate_wallets.py
+Run:   .venv/bin/python -B scripts/generate_wallets.py
 
 Secrets are stored outside the website/repository in
 ~/.local/share/sincoin/wallets/activation.wallet-private.json (unencrypted,

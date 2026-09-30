@@ -1,5 +1,18 @@
-// Keep the token and URL rules aligned with entertainer_links.py.
+// Keep the token and URL rules aligned with scripts/entertainer_links.py.
 // The extension omits the registry: link-like tokens are still excluded from names.
+export function linkKey(link) {
+  const url = new URL(link);
+  let host = url.hostname.replace(/^www\./, '');
+  host = ({'twitter.com': 'x.com', 'fb.com': 'facebook.com', 'threads.net': 'threads.com', 'telegram.me': 't.me'})[host] || host;
+  let path = url.pathname.replace(/\/+$/, '');
+  if (['x.com', 'instagram.com', 'facebook.com', 'onlyfans.com'].includes(host)) path = path.toLowerCase();
+  const pairs = [...url.searchParams].filter(([k]) => !k.toLowerCase().startsWith('utm_') && !['fbclid', 'gclid'].includes(k.toLowerCase()));
+  pairs.sort(([a, av], [b, bv]) => a < b ? -1 : a > b ? 1 : av < bv ? -1 : av > bv ? 1 : 0);
+  const query = new URLSearchParams(pairs).toString();
+  const port = url.port && !['80', '443'].includes(url.port) ? `:${url.port}` : '';
+  return host + port + path + (query ? `?${query}` : '');
+}
+
 export function parseLine(line, platforms = []) {
   const name = [], links = [], issues = [];
   const aliases = new Map(platforms.flatMap(p => p.aliases.map(a => [a, p])));
@@ -27,7 +40,7 @@ export function parseLine(line, platforms = []) {
       const url = new URL(value);
       if (!['http:', 'https:'].includes(url.protocol) || !url.hostname || url.username || url.password || /[\s<>\\]/.test(value)) throw new Error('Invalid URL');
       if (['twitter.com', 'www.twitter.com', 'www.x.com'].includes(url.hostname)) url.hostname = 'x.com';
-      if (!links.includes(url.href)) links.push(url.href);
+      if (!links.some(link => linkKey(link) === linkKey(url.href))) links.push(url.href);
     } catch { issues.push(`Invalid URL: ${token}`); }
   }
   return {name: name.join(' '), links, issues};
