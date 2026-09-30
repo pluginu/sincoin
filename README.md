@@ -6,7 +6,18 @@ SIN is a planned suite of tools that helps people discover adult entertainers an
 
 For creators, SIN aims to make it easier to be found through searchable profiles, relevant keywords, and paid visibility. The proposed $SIN token connects creator participation to the discovery ecosystem.
 
-**Status:** Early concept stage. This repository currently contains the project overview; the tools and features described below are planned, not implemented.
+**Status:** Early concept stage. This repository currently contains the project overview and entertainer list; the tools and features described below are planned, not implemented.
+
+## Entertainer list and requests
+
+[entertainers.txt](entertainers.txt) is the main file to check whether your name is listed. It contains one entertainer per line, with name parts separated by commas.
+
+If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
+
+- Your wallet must hold at least **200,000 SIN69 coins**.
+- A **0.25 SOL** payment on Solana is required as a processing fee to add your name.
+
+These requirements apply for the time being, unless stated otherwise. Submission and payment instructions, including the receiving wallet address, have not yet been published in this repository.
 
 ## Why SIN?
 
@@ -49,7 +60,7 @@ $SIN is the proposed economic layer of the ecosystem. The initial concept is for
 
 Registration costs are also intended to discourage mass spam submissions. Payment alone does not establish a creator's identity or prevent impersonation; profile trust and moderation will need their own mechanisms.
 
-Token integration, registration requirements, pricing, and any additional utility remain design decisions. This repository does not currently provide a token implementation or a verified contract address.
+The current entertainer-list requirements are described above. Token integration and any additional utility remain design decisions. This repository does not currently provide a token implementation or a verified contract address.
 
 ## Roadmap
 
