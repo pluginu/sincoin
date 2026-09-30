@@ -1,0 +1,684 @@
+[
+  {
+    "name": "X",
+    "domains": [
+      "x.com",
+      "twitter.com"
+    ],
+    "aliases": [
+      "x",
+      "twitter"
+    ],
+    "profile": "/{handle}",
+    "icon": "\ud835\udd4f"
+  },
+  {
+    "name": "Instagram",
+    "domains": [
+      "instagram.com"
+    ],
+    "aliases": [
+      "instagram",
+      "insta",
+      "ig"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u25ce"
+  },
+  {
+    "name": "Facebook",
+    "domains": [
+      "facebook.com",
+      "fb.com"
+    ],
+    "aliases": [
+      "facebook",
+      "fb"
+    ],
+    "profile": "/{handle}",
+    "icon": "f"
+  },
+  {
+    "name": "TikTok",
+    "domains": [
+      "tiktok.com"
+    ],
+    "aliases": [
+      "tiktok"
+    ],
+    "profile": "/@{handle}",
+    "icon": "\u266a"
+  },
+  {
+    "name": "YouTube",
+    "domains": [
+      "youtube.com",
+      "youtu.be"
+    ],
+    "aliases": [
+      "youtube",
+      "yt"
+    ],
+    "profile": "/@{handle}",
+    "icon": "\u25b6"
+  },
+  {
+    "name": "Threads",
+    "domains": [
+      "threads.net",
+      "threads.com"
+    ],
+    "aliases": [
+      "threads"
+    ],
+    "profile": "/@{handle}",
+    "icon": "@"
+  },
+  {
+    "name": "Bluesky",
+    "domains": [
+      "bsky.app"
+    ],
+    "aliases": [
+      "bluesky",
+      "bsky"
+    ],
+    "profile": "/profile/{handle}",
+    "icon": "\ud83e\udd8b"
+  },
+  {
+    "name": "Reddit",
+    "domains": [
+      "reddit.com"
+    ],
+    "aliases": [
+      "reddit"
+    ],
+    "profile": "/user/{handle}",
+    "icon": "r"
+  },
+  {
+    "name": "Snapchat",
+    "domains": [
+      "snapchat.com"
+    ],
+    "aliases": [
+      "snapchat",
+      "snap"
+    ],
+    "profile": "/add/{handle}",
+    "icon": "\ud83d\udc7b"
+  },
+  {
+    "name": "Telegram",
+    "domains": [
+      "t.me",
+      "telegram.me"
+    ],
+    "aliases": [
+      "telegram",
+      "tg"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u27a4"
+  },
+  {
+    "name": "Twitch",
+    "domains": [
+      "twitch.tv"
+    ],
+    "aliases": [
+      "twitch"
+    ],
+    "profile": "/{handle}",
+    "icon": "Tw"
+  },
+  {
+    "name": "Kick",
+    "domains": [
+      "kick.com"
+    ],
+    "aliases": [
+      "kick"
+    ],
+    "profile": "/{handle}",
+    "icon": "K"
+  },
+  {
+    "name": "Discord",
+    "domains": [
+      "discord.gg",
+      "discord.com"
+    ],
+    "aliases": [
+      "discord"
+    ],
+    "profile": null,
+    "icon": "D"
+  },
+  {
+    "name": "Pinterest",
+    "domains": [
+      "pinterest.com"
+    ],
+    "aliases": [
+      "pinterest"
+    ],
+    "profile": "/{handle}",
+    "icon": "P"
+  },
+  {
+    "name": "Tumblr",
+    "domains": [
+      "tumblr.com"
+    ],
+    "aliases": [
+      "tumblr"
+    ],
+    "profile": null,
+    "icon": "t"
+  },
+  {
+    "name": "LinkedIn",
+    "domains": [
+      "linkedin.com"
+    ],
+    "aliases": [
+      "linkedin"
+    ],
+    "profile": "/in/{handle}",
+    "icon": "in"
+  },
+  {
+    "name": "Mastodon",
+    "domains": [
+      "mastodon.social"
+    ],
+    "aliases": [
+      "mastodon"
+    ],
+    "profile": null,
+    "icon": "M"
+  },
+  {
+    "name": "OnlyFans",
+    "domains": [
+      "onlyfans.com"
+    ],
+    "aliases": [
+      "onlyfans",
+      "of"
+    ],
+    "profile": "/{handle}",
+    "icon": "OF"
+  },
+  {
+    "name": "Fansly",
+    "domains": [
+      "fansly.com"
+    ],
+    "aliases": [
+      "fansly"
+    ],
+    "profile": "/{handle}",
+    "icon": "FL"
+  },
+  {
+    "name": "Fanvue",
+    "domains": [
+      "fanvue.com"
+    ],
+    "aliases": [
+      "fanvue"
+    ],
+    "profile": "/{handle}",
+    "icon": "FV"
+  },
+  {
+    "name": "LoyalFans",
+    "domains": [
+      "loyalfans.com"
+    ],
+    "aliases": [
+      "loyalfans"
+    ],
+    "profile": "/{handle}",
+    "icon": "LF"
+  },
+  {
+    "name": "JustForFans",
+    "domains": [
+      "justfor.fans"
+    ],
+    "aliases": [
+      "justforfans",
+      "jff"
+    ],
+    "profile": "/{handle}",
+    "icon": "JFF"
+  },
+  {
+    "name": "ManyVids",
+    "domains": [
+      "manyvids.com"
+    ],
+    "aliases": [
+      "manyvids",
+      "mv"
+    ],
+    "profile": null,
+    "icon": "MV"
+  },
+  {
+    "name": "Pornhub",
+    "domains": [
+      "pornhub.com"
+    ],
+    "aliases": [
+      "pornhub",
+      "ph"
+    ],
+    "profile": null,
+    "icon": "PH"
+  },
+  {
+    "name": "Modelhub",
+    "domains": [
+      "modelhub.com"
+    ],
+    "aliases": [
+      "modelhub"
+    ],
+    "profile": null,
+    "icon": "MH"
+  },
+  {
+    "name": "XVideos",
+    "domains": [
+      "xvideos.com"
+    ],
+    "aliases": [
+      "xvideos"
+    ],
+    "profile": null,
+    "icon": "XV"
+  },
+  {
+    "name": "XNXX",
+    "domains": [
+      "xnxx.com"
+    ],
+    "aliases": [
+      "xnxx"
+    ],
+    "profile": null,
+    "icon": "XN"
+  },
+  {
+    "name": "xHamster",
+    "domains": [
+      "xhamster.com"
+    ],
+    "aliases": [
+      "xhamster"
+    ],
+    "profile": null,
+    "icon": "xH"
+  },
+  {
+    "name": "YouPorn",
+    "domains": [
+      "youporn.com"
+    ],
+    "aliases": [
+      "youporn"
+    ],
+    "profile": null,
+    "icon": "YP"
+  },
+  {
+    "name": "RedTube",
+    "domains": [
+      "redtube.com"
+    ],
+    "aliases": [
+      "redtube"
+    ],
+    "profile": null,
+    "icon": "RT"
+  },
+  {
+    "name": "Clips4Sale",
+    "domains": [
+      "clips4sale.com"
+    ],
+    "aliases": [
+      "clips4sale",
+      "c4s"
+    ],
+    "profile": null,
+    "icon": "C4S"
+  },
+  {
+    "name": "iWantClips",
+    "domains": [
+      "iwantclips.com"
+    ],
+    "aliases": [
+      "iwantclips"
+    ],
+    "profile": null,
+    "icon": "iWC"
+  },
+  {
+    "name": "Chaturbate",
+    "domains": [
+      "chaturbate.com"
+    ],
+    "aliases": [
+      "chaturbate"
+    ],
+    "profile": "/{handle}/",
+    "icon": "CB"
+  },
+  {
+    "name": "Stripchat",
+    "domains": [
+      "stripchat.com"
+    ],
+    "aliases": [
+      "stripchat"
+    ],
+    "profile": "/{handle}",
+    "icon": "SC"
+  },
+  {
+    "name": "MyFreeCams",
+    "domains": [
+      "myfreecams.com"
+    ],
+    "aliases": [
+      "myfreecams",
+      "mfc"
+    ],
+    "profile": null,
+    "icon": "MFC"
+  },
+  {
+    "name": "CamSoda",
+    "domains": [
+      "camsoda.com"
+    ],
+    "aliases": [
+      "camsoda"
+    ],
+    "profile": "/{handle}",
+    "icon": "CS"
+  },
+  {
+    "name": "BongaCams",
+    "domains": [
+      "bongacams.com"
+    ],
+    "aliases": [
+      "bongacams"
+    ],
+    "profile": null,
+    "icon": "BC"
+  },
+  {
+    "name": "LiveJasmin",
+    "domains": [
+      "livejasmin.com"
+    ],
+    "aliases": [
+      "livejasmin"
+    ],
+    "profile": null,
+    "icon": "LJ"
+  },
+  {
+    "name": "Streamate",
+    "domains": [
+      "streamate.com"
+    ],
+    "aliases": [
+      "streamate"
+    ],
+    "profile": null,
+    "icon": "SM"
+  },
+  {
+    "name": "Flirt4Free",
+    "domains": [
+      "flirt4free.com"
+    ],
+    "aliases": [
+      "flirt4free"
+    ],
+    "profile": null,
+    "icon": "F4F"
+  },
+  {
+    "name": "Fancentro",
+    "domains": [
+      "fancentro.com"
+    ],
+    "aliases": [
+      "fancentro"
+    ],
+    "profile": "/{handle}",
+    "icon": "FC"
+  },
+  {
+    "name": "IsMyGirl",
+    "domains": [
+      "ismygirl.com"
+    ],
+    "aliases": [
+      "ismygirl"
+    ],
+    "profile": "/{handle}",
+    "icon": "IMG"
+  },
+  {
+    "name": "AdmireMe",
+    "domains": [
+      "admireme.vip"
+    ],
+    "aliases": [
+      "admireme"
+    ],
+    "profile": null,
+    "icon": "AM"
+  },
+  {
+    "name": "AVN Stars",
+    "domains": [
+      "avn.com",
+      "stars.avn.com"
+    ],
+    "aliases": [
+      "avn"
+    ],
+    "profile": null,
+    "icon": "AVN"
+  },
+  {
+    "name": "SextPanther",
+    "domains": [
+      "sextpanther.com"
+    ],
+    "aliases": [
+      "sextpanther"
+    ],
+    "profile": null,
+    "icon": "SP"
+  },
+  {
+    "name": "NiteFlirt",
+    "domains": [
+      "niteflirt.com"
+    ],
+    "aliases": [
+      "niteflirt"
+    ],
+    "profile": null,
+    "icon": "NF"
+  },
+  {
+    "name": "FanCentro",
+    "domains": [
+      "fan.center"
+    ],
+    "aliases": [
+      "fancenter"
+    ],
+    "profile": null,
+    "icon": "FC"
+  },
+  {
+    "name": "Patreon",
+    "domains": [
+      "patreon.com"
+    ],
+    "aliases": [
+      "patreon"
+    ],
+    "profile": "/{handle}",
+    "icon": "Pa"
+  },
+  {
+    "name": "Ko-fi",
+    "domains": [
+      "ko-fi.com"
+    ],
+    "aliases": [
+      "kofi"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u2615"
+  },
+  {
+    "name": "Buy Me a Coffee",
+    "domains": [
+      "buymeacoffee.com"
+    ],
+    "aliases": [
+      "buymeacoffee"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u2615"
+  },
+  {
+    "name": "Throne",
+    "domains": [
+      "throne.com"
+    ],
+    "aliases": [
+      "throne"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u265b"
+  },
+  {
+    "name": "Wishtender",
+    "domains": [
+      "wishtender.com"
+    ],
+    "aliases": [
+      "wishtender"
+    ],
+    "profile": null,
+    "icon": "WT"
+  },
+  {
+    "name": "Amazon",
+    "domains": [
+      "amazon.com",
+      "amazon.co.uk"
+    ],
+    "aliases": [
+      "amazon"
+    ],
+    "profile": null,
+    "icon": "a"
+  },
+  {
+    "name": "Linktree",
+    "domains": [
+      "linktr.ee"
+    ],
+    "aliases": [
+      "linktree"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u2667"
+  },
+  {
+    "name": "AllMyLinks",
+    "domains": [
+      "allmylinks.com"
+    ],
+    "aliases": [
+      "allmylinks"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u2197"
+  },
+  {
+    "name": "Beacons",
+    "domains": [
+      "beacons.ai"
+    ],
+    "aliases": [
+      "beacons"
+    ],
+    "profile": "/{handle}",
+    "icon": "\u2726"
+  },
+  {
+    "name": "Carrd",
+    "domains": [
+      "carrd.co"
+    ],
+    "aliases": [
+      "carrd"
+    ],
+    "profile": null,
+    "icon": "\u25a3"
+  },
+  {
+    "name": "Linkbio",
+    "domains": [
+      "linkbio.co"
+    ],
+    "aliases": [
+      "linkbio"
+    ],
+    "profile": null,
+    "icon": "\u2197"
+  },
+  {
+    "name": "FetLife",
+    "domains": [
+      "fetlife.com"
+    ],
+    "aliases": [
+      "fetlife"
+    ],
+    "profile": null,
+    "icon": "Fet"
+  },
+  {
+    "name": "Slushy",
+    "domains": [
+      "slushy.com"
+    ],
+    "aliases": [
+      "slushy"
+    ],
+    "profile": null,
+    "icon": "SL"
+  }
+]

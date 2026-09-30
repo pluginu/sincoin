@@ -1,9 +1,10 @@
+import {parseDirectory} from '../entertainer-links.js';
 export const defaults = { enabled: true, includeNames: true, rules: [] };
 export const modes = ['exact', 'contains', 'starts', 'ends', 'regex'];
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const word = '[\\p{L}\\p{N}_]';
 export function parseNames(text) {
-  return [...new Set(text.split(/\r?\n/).map(line => line.split(',').map(s => s.trim()).filter(Boolean).join(' ')).filter(Boolean))];
+  return parseDirectory(text).map(record => record.name);
 }
 export function compileRule(rule) {
   if (!modes.includes(rule.mode)) throw new Error('Choose a valid matching mode.');

@@ -151,3 +151,16 @@ The community identity is the **Community of Sinners**. The brand direction is p
 The Chrome extension uses Manifest V3 and plain JavaScript, with no build step or production dependencies. See the setup and testing instructions above.
 
 Ideas, feedback, and contributions are welcome through repository issues and pull requests. Useful early topics include creator search, browser workflows, AI agent integrations, profile quality, and creator onboarding.
+
+### Social links and name detail pages
+
+Select a directory name in `index.html` to open a shareable `#entertainer=Name` detail view. Every supplied link has a platform symbol or initials; other websites use a globe. The page's **Supported social & website links** section lists all 60 recognized platforms and links to their sites. The registry lives in `social-platforms.json` and is shared by the Python importer and website.
+
+```text
+Example, Creator, x.com/example, instagram: @example, onlyfans.com/example
+Another Creator, https://www.pornhub.com/model/example, https://example.org
+```
+
+URLs may include or omit `https://`. Labeled handles use a registry alias followed by a colon, e.g. `ig: @example`, `twitter: example`, or `fansly: @example`. Bare `@handles` are ambiguous and must be labeled. Platforms with multiple profile formats require a full profile URL; no account ownership is inferred. HTTP and HTTPS websites outside the registry are supported too. Commas separate fields; encode literal commas in URLs as `%2C`.
+
+Run `python3 merge_entertainers.py entertainers.new.txt` to merge. Existing names receive new links without creating duplicate names or discarding old links. Twitter URLs normalize to X. Invalid or ambiguous links stop the merge with a filename and line number before the main file is changed. Names without links remain supported, and the extension highlights only the name.

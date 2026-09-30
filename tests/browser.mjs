@@ -7,6 +7,7 @@ import path from 'node:path';
 const temp = await mkdtemp(path.join(tmpdir(), 'sin-test-'));
 const extension = path.join(temp, 'extension');
 await cp('extension', path.join(extension, 'extension'), {recursive: true});
+await cp('entertainer-links.js', path.join(extension, 'entertainer-links.js'));
 await cp('manifest.json', path.join(extension, 'manifest.json'));
 await cp('entertainers.txt', path.join(extension, 'entertainers.txt'));
 const server = createServer((req,res) => {res.setHeader('Content-Type','text/html'); res.end('<!doctype html><p>Angela <b>White</b>, Riley Reid, Joanna and Anna.</p><textarea>Angela White</textarea><div contenteditable="true">Riley Reid</div><div hidden>Stoya</div>');});
@@ -25,7 +26,7 @@ try {
   await page.waitForFunction(() => CSS.highlights.get('sin-names')?.size === 3);
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${id}/extension/popup.html`);
-  await popup.locator('#nameCount').filter({hasText:'50 names'}).waitFor();
+  await popup.locator('#nameCount').filter({hasText: `${(await readFile('entertainers.txt', 'utf8')).trim().split(/\r?\n/).length} names`}).waitFor();
   await popup.locator('#enabled').uncheck();
   await page.waitForFunction(() => !CSS.highlights.has('sin-names'));
   await popup.locator('#enabled').check();

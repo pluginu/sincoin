@@ -38,6 +38,7 @@
     @media(max-width:850px){.visual{height:320px}.coin-panel{grid-template-columns:1fr}.coin-panel .actions{flex-direction:row}}
     @media(max-width:600px){.visual{height:300px}.campaign{margin-bottom:30px}.campaign figcaption{font-size:9px;letter-spacing:1px;padding:12px;flex-wrap:wrap}.coin-panel{padding:22px;margin-bottom:35px}.contract-address{font-size:13px}nav{gap:12px}.hero{padding-top:45px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}.reveal-pending{opacity:1;transform:none}}
+    .social-links{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:14px}.social-links li{border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}.social-links a{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.social-links small{display:block;width:100%;font-size:12px;color:var(--muted);overflow-wrap:anywhere}.social-icon{display:inline-grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:10px;background:#303b29;color:var(--accent);font-size:15px;font-weight:bold}.social-links a:hover{color:var(--accent)}#detail-name{margin-top:25px}summary{cursor:pointer;color:var(--accent)}#supported-links code{overflow-wrap:anywhere}
   </style>
 </head>
 <body>
@@ -53,10 +54,23 @@
     <section class="coin-panel" id="coin" aria-labelledby="coin-heading"><div><p class="eyebrow">SIN coin · SIN69</p><h2 id="coin-heading">Step into the SIN community.</h2><span class="contract-label">Solana contract address</span><code class="contract-address" id="contract-address">QteALBkDWA8P5eBXWNeDHQ7gH9gTjsRbiHCdBUtpump</code><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p></div><div class="actions"><a class="button" href="https://pump.fun/coin/QteALBkDWA8P5eBXWNeDHQ7gH9gTjsRbiHCdBUtpump" target="_blank" rel="noopener noreferrer">Buy SIN69 on pump.fun ↗</a><button class="button secondary" id="copy-contract" type="button">Copy contract address</button></div></section>
     <section id="directory" aria-labelledby="directory-heading">
       <div class="section-head"><div><p class="eyebrow">The public list</p><h2 id="directory-heading">Find a familiar name.</h2><p class="muted">Browse the entertainer list or search to see who’s included.</p><p class="muted">Can’t find your favorite entertainer? Reach out and ask them to add their name so you can find them in the future on any site you visit.</p></div><a class="file-link" href="entertainers.txt">Source: entertainers.txt ↗</a></div>
-      <div class="search-box"><label for="search">Search entertainers</label><div class="input-row"><input id="search" type="search" placeholder="Try a name, e.g. Angela White" autocomplete="off" spellcheck="false" disabled aria-controls="names"><button id="clear" type="button" hidden>Clear</button></div><p id="results-status" role="status" aria-live="polite">Loading the entertainer list…</p><ul id="names" aria-label="Entertainer names"></ul><p id="empty" hidden>No names found. Try a different name or a shorter search.</p><noscript><p>Enable JavaScript to search, or <a href="entertainers.txt">view the complete text file</a>.</p></noscript><div class="file-bar"><p class="muted">An open, simple list. One entertainer per line, with name parts separated by commas. Search runs in your browser.</p><div class="actions"><a class="button secondary" href="entertainers.txt">View file ↗</a><a class="button" href="entertainers.txt" download="entertainers.txt">Download ↓</a></div></div></div>
+      <div class="search-box"><label for="search">Search entertainers</label><div class="input-row"><input id="search" type="search" placeholder="Try a name, e.g. Angela White" autocomplete="off" spellcheck="false" disabled aria-controls="names"><button id="clear" type="button" hidden>Clear</button></div><p id="results-status" role="status" aria-live="polite">Loading the entertainer list…</p><ul id="names" aria-label="Entertainer names"></ul><p id="empty" hidden>No names found. Try a different name or a shorter search.</p><noscript><p>Enable JavaScript to search, or <a href="entertainers.txt">view the complete text file</a>.</p></noscript><div class="file-bar"><p class="muted">An open, simple list. One entertainer per line, with name parts separated by commas. Add social URLs or platform-labeled handles after the name. Select a name to view its links. Search runs in your browser.</p><div class="actions"><a class="button secondary" href="entertainers.txt">View file ↗</a><a class="button" href="entertainers.txt" download="entertainers.txt">Download ↓</a></div></div></div>
     </section>
-    <section id="how-it-works" aria-labelledby="how-heading"><div class="section-head"><div><p class="eyebrow">Simple by design</p><h2 id="how-heading">From a name to a connection.</h2><p class="muted">The list is the starting point. Here’s the larger discovery experience we’re building toward.</p></div></div><div class="cards"><article class="card"><span class="number">01 / DISCOVER</span><h3>Find someone relevant.</h3><p>Search the list by name today. Future tools aim to support categories, interests, and natural-language discovery.</p></article><article class="card"><span class="number">02 / FOLLOW</span><h3>Go where they create.</h3><p>Planned creator profiles will bring together platform links, making it easier to find and follow creators across the web.</p></article><article class="card"><span class="number">03 / SUPPORT</span><h3>Make the connection count.</h3><p>Choose how to support creators on their own platforms. This directory currently lists names; it doesn’t host profiles or process payments.</p></article></div></section>
-    <section id="project" aria-labelledby="project-heading"><div class="about-grid"><div><p class="eyebrow">Early days. Real ambition.</p><h2 id="project-heading">One shared discovery layer.</h2><p>SIN is an early-stage project for adult creator discovery. The vision brings together a directory, browser tools, AI agent plugins, and search integrations so creators can be found in more places.</p><p>This repository includes the public name list and a browser name-highlighter prototype. Full creator profiles, integrations, and paid visibility are still planned.</p><p>SIN69 is the SIN community coin. Find its contract address and pump.fun purchase link above. Creator registration integration and keyword pricing are still being designed.</p><a class="file-link" href="https://github.com/pluginu/sincoin">Explore the project on GitHub ↗</a></div><div aria-label="Project progress"><div class="milestone"><span>Public name list &amp; page search</span><span class="status live">Available</span></div><div class="milestone"><span>Browser name highlighter</span><span class="status live">Prototype</span></div><div class="milestone"><span>Creator profiles &amp; platform links</span><span class="status">Planned</span></div><div class="milestone"><span>AI plugins &amp; search integrations</span><span class="status">Planned</span></div><div class="milestone"><span>Keywords &amp; labeled paid placements</span><span class="status">Planned</span></div><div class="milestone"><span>$SIN registration integration</span><span class="status">Planned</span></div></div></div></section>
+    <section id="entertainer-detail" hidden aria-labelledby="detail-name">
+      <a href="#directory">← Back to directory</a>
+      <h2 id="detail-name" tabindex="-1"></h2>
+      <p id="detail-message" class="muted"></p>
+      <ul id="detail-links" class="social-links"></ul>
+      <p id="detail-issues" class="muted"></p>
+    </section>
+    <section id="supported-links" aria-labelledby="supported-heading">
+      <h2 id="supported-heading">Supported social &amp; website links</h2>
+      <p class="muted">Choose a name to view its links. We recognize the platforms below, plus any other HTTP or HTTPS website with a globe icon. Icons use platform symbols or initials.</p>
+      <p class="muted">Add links after the name: <code>Example, Creator, x.com/example, instagram: @example, onlyfans.com/example</code>. A bare @handle needs a platform label. For platforms marked “Full profile URL,” paste the complete address, including the profile path. Links are supplied by contributors and are not verified accounts.</p>
+      <details><summary>Browse all 60 supported platforms</summary><ul id="supported-platforms" class="social-links"></ul></details>
+    </section>
+    <section id="how-it-works" aria-labelledby="how-heading"><div class="section-head"><div><p class="eyebrow">Simple by design</p><h2 id="how-heading">From a name to a connection.</h2><p class="muted">The list is the starting point. Here’s the larger discovery experience we’re building toward.</p></div></div><div class="cards"><article class="card"><span class="number">01 / DISCOVER</span><h3>Find someone relevant.</h3><p>Search the list by name today. Future tools aim to support categories, interests, and natural-language discovery.</p></article><article class="card"><span class="number">02 / FOLLOW</span><h3>Go where they create.</h3><p>Open a name to view its listed social profiles and websites, and follow creators across the web.</p></article><article class="card"><span class="number">03 / SUPPORT</span><h3>Make the connection count.</h3><p>Choose how to support creators on their own platforms. The directory brings together names and supplied links; payments are handled separately.</p></article></div></section>
+    <section id="project" aria-labelledby="project-heading"><div class="about-grid"><div><p class="eyebrow">Early days. Real ambition.</p><h2 id="project-heading">One shared discovery layer.</h2><p>SIN is an early-stage project for adult creator discovery. The vision brings together a directory, browser tools, AI agent plugins, and search integrations so creators can be found in more places.</p><p>This repository includes the public name list and a browser name-highlighter prototype. Name detail pages and platform links are available; richer profiles, integrations, and paid visibility are still planned.</p><p>SIN69 is the SIN community coin. Find its contract address and pump.fun purchase link above. Creator registration integration and keyword pricing are still being designed.</p><a class="file-link" href="https://github.com/pluginu/sincoin">Explore the project on GitHub ↗</a></div><div aria-label="Project progress"><div class="milestone"><span>Public name list &amp; page search</span><span class="status live">Available</span></div><div class="milestone"><span>Browser name highlighter</span><span class="status live">Prototype</span></div><div class="milestone"><span>Name details &amp; platform links</span><span class="status live">Available</span></div><div class="milestone"><span>AI plugins &amp; search integrations</span><span class="status">Planned</span></div><div class="milestone"><span>Keywords &amp; labeled paid placements</span><span class="status">Planned</span></div><div class="milestone"><span>$SIN registration integration</span><span class="status">Planned</span></div></div></div></section>
     <section aria-labelledby="join-heading"><div class="join"><div><p class="eyebrow">For creators</p><h2 id="join-heading">Your name belongs here.</h2><p>Missing from the list? Request an addition through a repository issue or pull request with your name and wallet address.</p><div class="actions"><a class="button" href="https://github.com/pluginu/sincoin/issues">Request an addition ↗</a><a class="button secondary" href="https://github.com/pluginu/sincoin/blob/main/README.md">Project details</a></div></div><div><h3>Current listing requirements</h3><ul class="requirements"><li>Hold at least <strong>200,000 SIN69 coins</strong> in your wallet.</li><li>Activation is currently <strong>$25 USD</strong>, payable in the equivalent amount of crypto.</li></ul><p class="small">Send the equivalent of $25 at the time of payment. Close enough is fine—we’ll honor small exchange-rate differences. Activation pricing may change with volume and the tool’s user base; check this page before paying.</p></div></div></section>
     <section id="activation" aria-labelledby="activation-heading">
       <div class="section-head"><div><p class="eyebrow">Activate your listing</p><h2 id="activation-heading">$25 activation · pay with crypto</h2><p class="muted">USDC or USDT is preferred—send approximately 25 tokens when valued at $1 each, or $25 worth of BTC, SOL, or ETH using your wallet’s current quote.</p></div></div>
@@ -72,7 +86,8 @@
   </main>
   <footer><p><strong>SIN.</strong> &nbsp; Discover. Follow. Support. &nbsp;·&nbsp; For adults 18+</p><div><a href="entertainers.txt">The list</a><a href="https://github.com/pluginu/sincoin">GitHub ↗</a></div></footer>
 </div>
-<script>
+<script type="module">
+  import {parseDirectory, platformFor} from "./entertainer-links.js";
   // Copy the address shown on the selected network's card to avoid mismatches.
   document.querySelectorAll('[data-copy-payment]').forEach(button => {
     button.addEventListener('click', async () => {
@@ -122,14 +137,18 @@
   const empty = document.querySelector('#empty');
   const clear = document.querySelector('#clear');
   let names = [];
+  let platforms = [];
   const normalize = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
   function render() {
     const query = normalize(search.value);
-    const matches = names.filter(name => normalize(name).includes(query));
+    const matches = names.filter(name => normalize(name.name).includes(query));
     const fragment = document.createDocumentFragment();
     for (const name of matches) {
       const item = document.createElement('li');
-      item.textContent = name;
+      const link = document.createElement('a');
+      link.href = '#entertainer=' + encodeURIComponent(name.name);
+      link.textContent = name.name;
+      item.append(link);
       fragment.append(item);
     }
     list.replaceChildren(fragment);
@@ -141,15 +160,82 @@
   clear.addEventListener('click', () => { search.value = ''; render(); search.focus(); });
   async function loadNames() {
     try {
-      const response = await fetch('entertainers.txt');
+      const [response, registry] = await Promise.all([fetch('entertainers.txt'), fetch('social-platforms.json')]);
+      if (!registry.ok) throw new Error('Platforms unavailable');
+      platforms = await registry.json();
       if (!response.ok) throw new Error('List unavailable');
-      names = [...new Set((await response.text()).split(/\r?\n/).map(line => line.split(',').map(part => part.trim()).filter(Boolean).join(' ')).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+      names = parseDirectory(await response.text(), platforms);
+      renderSupported();
+      renderDetail();
       search.disabled = false;
       render();
     } catch {
       status.textContent = location.protocol === 'file:' ? 'To use search, open this page through a local web server or a static website host. You can still view or download the file below.' : 'The list could not be loaded. Refresh to try again, or use the file links below.';
     }
   }
+  function badge(platform) {
+    const icon = document.createElement('span');
+    icon.className = 'social-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = platform.icon;
+    return icon;
+  }
+  // Build the help list from the same registry used to interpret labeled handles.
+  function renderSupported() {
+    const list = document.querySelector('#supported-platforms');
+    list.replaceChildren();
+    for (const platform of platforms) {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = 'https://' + platform.domains[0];
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(badge(platform), document.createTextNode(platform.name));
+      item.append(link);
+      const hint = document.createElement('small');
+      hint.textContent = platform.profile ? `${platform.aliases[0]}: @handle or URL` : 'Full profile URL';
+      item.append(hint);
+      list.append(item);
+    }
+  }
+  // Hash routing makes details bookmarkable on static hosts and supports browser history.
+  function renderDetail() {
+    const panel = document.querySelector('#entertainer-detail');
+    const active = location.hash.startsWith('#entertainer=');
+    panel.hidden = !active;
+    if (!active) return;
+    let name;
+    try { name = decodeURIComponent(location.hash.slice(13)); } catch { name = ''; }
+    const record = names.find(item => item.name.toLowerCase() === name.toLowerCase());
+    const heading = document.querySelector('#detail-name');
+    heading.textContent = record ? record.name : 'Entertainer not found';
+    const links = document.querySelector('#detail-links');
+    links.replaceChildren();
+    document.querySelector('#detail-message').textContent = record
+      ? (record.links.length ? 'Links supplied in the entertainer list.' : 'No links have been listed for this entertainer yet.')
+      : 'Return to the directory to find a name.';
+    for (const url of record?.links || []) {
+      const platform = platformFor(url, platforms);
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.append(badge(platform), document.createTextNode(platform.name + ' ↗'));
+      const address = document.createElement('small');
+      // Contributor-supplied text stays text; never interpolate it as HTML.
+      address.textContent = url;
+      link.append(address);
+      item.append(link);
+      links.append(item);
+    }
+    document.querySelector('#detail-issues').textContent = record?.issues.join(' ') || '';
+    panel.classList.remove('reveal-pending');
+    panel.classList.add('is-visible');
+    panel.scrollIntoView();
+    heading.focus({preventScroll: true});
+  }
+  window.addEventListener('hashchange', renderDetail);
   loadNames();
 </script>
 </body>
