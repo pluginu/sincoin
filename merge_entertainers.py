@@ -4,6 +4,7 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import tempfile
 
 
@@ -17,6 +18,10 @@ def merge_entertainers(new_file, main_file):
     added = 0
     for is_new, contents in ((False, existing), (True, incoming)):
         for line in contents.splitlines():
+            if is_new:
+                # Strip pasted list numbers, including markers such as "1." or "2)".
+                # Clean before deduplication so numbered copies match existing names.
+                line = re.sub(r"^\s*\d+[.)]?\s*", "", line)
             # Commas and spaces both separate name parts in the extension.
             parts = line.replace(",", " ").split()
             key = " ".join(parts).casefold()
