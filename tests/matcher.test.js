@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {parseNames, matchTexts, compileRule} from '../extension/matcher.js';
+const matches = (text, value, mode = 'exact', caseSensitive = false) => matchTexts([text], [{value, mode, caseSensitive}])[0].map(([a,b]) => text.slice(a,b));
+test('name file joins comma-separated parts and removes empty lines and duplicates', () => assert.deepEqual(parseNames(' Angela, White\r\nKagney, Linn, Karter\nStoya\n\nAngela, White'), ['Angela White','Kagney Linn Karter','Stoya']));
+test('exact uses Unicode word boundaries and flexible whitespace', () => { assert.deepEqual(matches('Anna Ann éAnn Ann_ Angela\n White', 'Ann'), ['Ann']); assert.deepEqual(matches('Angela\n White', 'Angela White'), ['Angela\n White']); });
+test('contains, starts and ends match the requested part', () => { assert.deepEqual(matches('Ann Joanna Anna', 'ann', 'contains'), ['Ann','ann','Ann']); assert.deepEqual(matches('Ann Joanna Anna', 'ann', 'starts'), ['Ann','Ann']); assert.deepEqual(matches('Ann Joanna Anna', 'ann', 'ends'), ['Ann']); });
+test('case sensitivity and escaped literal punctuation', () => { assert.deepEqual(matches('stoya Stoya', 'Stoya', 'exact', true), ['Stoya']); assert.deepEqual(matches('a+b aaab', 'a+b', 'contains'), ['a+b']); });
+test('regex handles alternatives, zero width and astral characters', () => { assert.deepEqual(matches('Riley Reid and Angela White', '(Riley|Angela)\\s+\\w+', 'regex'), ['Riley Reid','Angela White']); assert.deepEqual(matches('😀a', '(?:)', 'regex'), []); });
+test('invalid and empty expressions rejected', () => { assert.throws(() => compileRule({value:'[',mode:'regex'})); assert.throws(() => compileRule({value:' ',mode:'exact'})); });
+test('overlapping matches merge and disabled rules are ignored', () => assert.deepEqual(matchTexts(['Angela White'], [{value:'Angela', mode:'exact'},{value:'Angela White', mode:'exact'},{value:'White',mode:'exact',enabled:false}]), [[[0,12]]]));
+test('match count is bounded', () => assert.equal(matchTexts(['a a a'], [{value:'a',mode:'exact'}], 2)[0].length, 2));

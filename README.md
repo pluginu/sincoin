@@ -6,7 +6,56 @@ SIN is a planned suite of tools that helps people discover adult entertainers an
 
 For creators, SIN aims to make it easier to be found through searchable profiles, relevant keywords, and paid visibility. The proposed $SIN token connects creator participation to the discovery ecosystem.
 
-**Status:** Early concept stage. This repository currently contains the project overview and entertainer list; the tools and features described below are planned, not implemented.
+**Status:** The Chrome name-highlighting extension is implemented. The directory, token features, and other integrations below remain planned.
+
+## Install the Chrome extension
+
+1. Download or clone this repository into a folder you will keep on your computer.
+2. Open `chrome://extensions` in Chrome 120 or later and enable **Developer mode**.
+3. Click **Load unpacked** and select the repository folder containing `manifest.json`.
+4. Pin **SIN — Name Highlighter** from Chrome’s extensions menu, then refresh any already-open website tabs.
+5. Click the extension to toggle highlighting or add your own rules.
+
+Names are highlighted in gold. The popup shows the number of highlights in the main page; matching frames are highlighted too. Turning the extension off removes highlights from open tabs. You can separately disable the entertainer list and enable, edit, or delete individual custom rules. Changes apply to open pages automatically.
+
+### Runtime entertainer file
+
+`entertainers.txt` is read **at runtime**, with caching disabled, on each page scan. It is not compiled into JavaScript or permanently cached when the extension starts. Each line represents a full name: `Angela, White` becomes `Angela White`, and `Kagney, Linn, Karter` becomes `Kagney Linn Karter`. Matching is case-insensitive and respects word boundaries.
+
+Edit the file in the folder loaded into Chrome. Open pages re-scan every 30 seconds, as well as after page content or settings change, so additions and removals take effect without rebuilding or reloading the extension. The popup’s name count is refreshed when it opens.
+
+The file belongs to the **local installed copy**. Changing a GitHub file does not automatically change another user's installed copy. A hosted list endpoint would be needed to distribute live updates to everyone. No remote service is used by this version.
+
+### Custom matching
+
+| Mode | Behavior | Example |
+| --- | --- | --- |
+| Exact word / phrase | Full word or phrase with word boundaries | `Ann` matches `Ann`, not `Anna` |
+| Contains | Text anywhere, including inside a word | `ann` matches part of `Joanna` |
+| Starts with | Text at the beginning of a word | `Ang` highlights `Ang` in `Angela` |
+| Ends with | Text at the end of a word | `ley` highlights `ley` in `Riley` |
+| Regular expression | JavaScript regex, entered without `/` delimiters | `(?:Angela|Riley)\s+\w+` |
+
+All modes default to case-insensitive matching; each custom rule can enable case sensitivity. Literal phrases allow variable whitespace. Regex uses global and Unicode flags, plus the case-insensitive flag unless you enable case sensitivity. Empty regex matches are skipped, and overlapping highlights merge. Regex anchors apply to each block of page text, not the whole website. Full names can span inline formatting, such as `Angela <b>White</b>`.
+
+Up to 100 custom rules are stored locally. Regex runs in a terminable worker; a scan taking over 1.5 seconds is stopped and reported in the popup. Simplify or disable the problematic expression to resume highlighting.
+
+### Scope and privacy
+
+The extension reads ordinary HTTP/HTTPS page text and keeps all processing on your device. It sends no browsing content to any server. Chrome’s website-access permission is needed to highlight pages automatically. Storage holds your preferences and custom rules; an offscreen document hosts the matching worker.
+
+Chrome internal pages, the Chrome Web Store, the built-in PDF viewer, images, canvas text, and shadow DOM content are not supported. Form fields, editable regions, scripts, and hidden elements are excluded. Highlights use the CSS Custom Highlight API without replacing website text or links. Very large pages are limited to the first 200,000 characters and 5,000 raw matches per frame per scan; the popup reports when the limit is reached.
+
+### Development and checks
+
+```sh
+npm install
+npm test
+npx playwright install chromium
+npm run test:browser
+```
+
+Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitivity, regex validation, overlap handling, and match limits. Browser checks load an isolated copy of the real extension and exercise highlighting, inline text, dynamic pages, excluded fields, toggle behavior, rule editing and persistence, runtime file changes, and regex timeout recovery. No build step is required to load the extension.
 
 ## Entertainer list and requests
 
@@ -66,7 +115,7 @@ The current entertainer-list requirements are described above. Token integration
 
 - [ ] Define the creator profile model and registration flow.
 - [ ] Build a searchable creator directory.
-- [ ] Bring discovery into a browser extension.
+- [x] Bring discovery into a browser extension.
 - [ ] Add integrations for AI agents and other search tools.
 - [ ] Develop keyword purchasing and clearly labeled paid placements.
 - [ ] Implement the proposed $SIN registration integration.
@@ -85,6 +134,6 @@ The community identity is the **Community of Sinners**. The brand direction is p
 
 ## Development and contributions
 
-There is no application code or setup process yet. The technology stack, integration interfaces, and implementation milestones will be documented as development begins.
+The Chrome extension uses Manifest V3 and plain JavaScript, with no build step or production dependencies. See the setup and testing instructions above.
 
 Ideas, feedback, and contributions are welcome through repository issues and pull requests. Useful early topics include creator search, browser workflows, AI agent integrations, profile quality, and creator onboarding.

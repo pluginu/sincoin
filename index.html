@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SIN is building better discovery for adult entertainers and creators. Explore the public entertainer list and learn what comes next.">
+  <meta name="theme-color" content="#101110">
+  <title>SIN — Discover. Follow. Support.</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101110;--panel:#191b18;--line:#33372d;--text:#f0f1e9;--muted:#a5aa9b;--accent:#d3fb78}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6}a{color:inherit;text-underline-offset:4px}button,input{font:inherit}a,button,input{touch-action:manipulation}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:5px}.wrap{width:min(1160px,calc(100% - 64px));margin:auto}.skip{position:absolute;top:-80px;left:20px;background:var(--accent);color:var(--bg);padding:12px;z-index:5}.skip:focus{top:10px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:25px 0;border-bottom:1px solid var(--line)}.logo{font-weight:900;font-size:33px;letter-spacing:-3px;text-decoration:none;line-height:1}.logo span{color:var(--accent)}nav{display:flex;gap:28px;font-size:13px}nav a{text-decoration:none;color:var(--muted)}nav a:hover{color:var(--accent)}.tag,.eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}.tag{border:1px solid var(--line);border-radius:30px;padding:6px 12px;color:var(--muted)}
+    .hero{display:grid;grid-template-columns:1.35fr 1fr;gap:60px;padding:85px 0 75px;align-items:center}.eyebrow{color:var(--accent);margin:0 0 24px}.eyebrow::before{content:' ';display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:10px}h1{font-size:clamp(56px,7.3vw,94px);line-height:.99;letter-spacing:-5px;margin:0 0 27px;font-weight:800}h1 span{color:var(--accent)}.intro{max-width:475px;color:var(--muted);font-size:17px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.button{display:inline-flex;align-items:center;justify-content:center;gap:25px;background:var(--accent);color:var(--bg);padding:12px 20px;border:1px solid var(--accent);border-radius:5px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}.button:hover{filter:brightness(1.1)}.button.secondary{background:transparent;border-color:var(--line);color:var(--text)}
+    .visual{height:355px;border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#303c20 0, #171b14 60%,#141613 100%);display:grid;place-items:center}.orbit{position:absolute;width:300px;height:300px;border:1px solid #72844933;border-radius:50%}.orbit.two{width:420px;height:420px}.orbit.three{width:180px;height:180px}.big-logo{font-size:110px;font-weight:900;letter-spacing:-12px;color:var(--accent);transform:rotate(-9deg);text-shadow:0 8px 45px #b6e96633}.floating{position:absolute;background:#20271b;border:1px solid #4b5838;padding:7px 13px;border-radius:30px;font-size:11px;letter-spacing:1px;color:#d7dfc9}.floating.top{top:38px;left:25px}.floating.bottom{bottom:42px;right:21px}.visual-note{position:absolute;bottom:14px;font-size:9px;letter-spacing:2px;color:var(--muted)}
+    section{padding:57px 0;border-top:1px solid var(--line)}.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:27px}h2{font-size:32px;letter-spacing:-1px;line-height:1.2;margin:0 0 12px}p{margin:0 0 15px}.muted{color:var(--muted)}.section-head p{margin:0;font-size:14px}.file-link{font-size:12px;color:var(--muted);white-space:nowrap}.search-box{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:25px}label{display:block;font-size:12px;font-weight:700;margin-bottom:9px}.input-row{position:relative}input{width:100%;padding:15px 78px 15px 17px;color:var(--text);background:var(--bg);border:1px solid #454a3d;border-radius:5px;appearance:none}input::placeholder{color:#8c9183}#clear{position:absolute;right:10px;top:10px;background:#292e23;border:0;border-radius:4px;padding:6px 10px;color:var(--text);cursor:pointer}#results-status{font-size:12px;color:var(--muted);margin:17px 0}#names{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 22px;padding:0;margin:0;max-height:365px;overflow:auto;scrollbar-color:#626f4c var(--panel)}#names li{padding:13px 0;border-top:1px solid var(--line);font-size:14px;overflow-wrap:anywhere}#empty{padding:22px 0;color:var(--muted)}.file-bar{display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid var(--line);padding-top:20px;margin-top:22px}.file-bar p{font-size:12px;margin:0;max-width:530px}.file-bar .actions{margin:0;flex-shrink:0}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{border:1px solid var(--line);border-radius:8px;padding:26px;background:var(--panel)}.number{color:var(--accent);font-family:monospace;font-size:12px;display:block;margin-bottom:30px}h3{font-size:18px;line-height:1.35;margin:0 0 12px;letter-spacing:-.3px}.card p{font-size:14px;color:var(--muted);margin:0}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:75px}.about-grid p{color:var(--muted);font-size:14px}.milestone{border-bottom:1px solid var(--line);padding:17px 0;display:flex;justify-content:space-between;align-items:center;gap:18px;font-size:14px}.milestone:first-child{padding-top:0}.status{font-size:10px;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;white-space:nowrap}.status.live{color:var(--accent)}.join{display:grid;grid-template-columns:1fr 1fr;gap:70px;padding:30px;border:1px solid #465332;border-radius:9px;background:#1c2217}.join p{font-size:14px;color:var(--muted)}.join h2{font-size:27px}.join .actions{margin-top:20px}.requirements{font-size:14px;padding-left:18px;margin:0 0 15px}.requirements li{margin-bottom:8px}.small{font-size:12px!important}footer{padding:30px 0 35px;display:flex;justify-content:space-between;align-items:center;gap:20px;color:var(--muted);font-size:11px}footer p{margin:0}footer a{margin-left:20px} [hidden]{display:none!important}
+    @media(max-width:850px){.hero{gap:30px}.visual{height:310px}h1{letter-spacing:-3px}#names{grid-template-columns:repeat(3,minmax(0,1fr))}.file-bar{align-items:start;flex-direction:column}.about-grid,.join{gap:35px}.card{padding:20px}}
+    @media(max-width:600px){.wrap{width:calc(100% - 36px)}header{padding:22px 0}header>.tag{display:none}nav{gap:19px;font-size:12px}.hero{grid-template-columns:1fr;padding:49px 0 40px;gap:30px}h1{font-size:66px}.intro{font-size:16px}.visual{height:240px}.big-logo{font-size:95px}.floating.top{top:23px}.floating.bottom{bottom:32px}section{padding:38px 0}.section-head{align-items:start;flex-direction:column;gap:12px}h2{font-size:28px}.search-box{padding:17px}#names{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 15px}#names li{font-size:13px}.cards,.about-grid,.join{grid-template-columns:1fr}.number{margin-bottom:15px}.join{padding:23px;gap:15px}footer{align-items:start;flex-direction:column}footer a{margin:0 20px 0 0}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header><a class="logo" href="#" aria-label="SIN home">SIN<span>.</span></a><nav aria-label="Main navigation"><a href="#directory">Directory</a><a href="#how-it-works">How it works</a><a href="#project">The project</a></nav><span class="tag">Built in public</span></header>
+  <main id="main">
+    <div class="hero">
+      <div><p class="eyebrow">A new way to discover</p><h1>Discover.<br>Follow.<br><span>Support.</span></h1><p class="intro">Great creators deserve to be found. SIN is building tools to connect you with adult entertainers and creators, wherever you browse.</p><div class="actions"><a class="button" href="#directory">Explore the names <span aria-hidden="true">↗</span></a><a class="button secondary" href="#project">Meet the project</a></div></div>
+      <div class="visual" aria-hidden="true"><div class="orbit"></div><div class="orbit two"></div><div class="orbit three"></div><span class="floating top">✦ DISCOVERY STARTS HERE</span><span class="big-logo">SIN.</span><span class="floating bottom">CREATORS. CONNECTED. ↗</span><span class="visual-note">THE COMMUNITY OF SINNERS</span></div>
+    </div>
+    <section id="directory" aria-labelledby="directory-heading">
+      <div class="section-head"><div><p class="eyebrow">The public list</p><h2 id="directory-heading">Find a familiar name.</h2><p class="muted">Browse the entertainer list or search to see who’s included.</p></div><a class="file-link" href="entertainers.txt">Source: entertainers.txt ↗</a></div>
+      <div class="search-box"><label for="search">Search entertainers</label><div class="input-row"><input id="search" type="search" placeholder="Try a name, e.g. Angela White" autocomplete="off" spellcheck="false" disabled aria-controls="names"><button id="clear" type="button" hidden>Clear</button></div><p id="results-status" role="status" aria-live="polite">Loading the entertainer list…</p><ul id="names" aria-label="Entertainer names"></ul><p id="empty" hidden>No names found. Try a different name or a shorter search.</p><noscript><p>Enable JavaScript to search, or <a href="entertainers.txt">view the complete text file</a>.</p></noscript><div class="file-bar"><p class="muted">An open, simple list. One entertainer per line, with name parts separated by commas. Search runs in your browser.</p><div class="actions"><a class="button secondary" href="entertainers.txt">View file ↗</a><a class="button" href="entertainers.txt" download="entertainers.txt">Download ↓</a></div></div></div>
+    </section>
+    <section id="how-it-works" aria-labelledby="how-heading"><div class="section-head"><div><p class="eyebrow">Simple by design</p><h2 id="how-heading">From a name to a connection.</h2><p class="muted">The list is the starting point. Here’s the larger discovery experience we’re building toward.</p></div></div><div class="cards"><article class="card"><span class="number">01 / DISCOVER</span><h3>Find someone relevant.</h3><p>Search the list by name today. Future tools aim to support categories, interests, and natural-language discovery.</p></article><article class="card"><span class="number">02 / FOLLOW</span><h3>Go where they create.</h3><p>Planned creator profiles will bring together platform links, making it easier to find and follow creators across the web.</p></article><article class="card"><span class="number">03 / SUPPORT</span><h3>Make the connection count.</h3><p>Choose how to support creators on their own platforms. This directory currently lists names; it doesn’t host profiles or process payments.</p></article></div></section>
+    <section id="project" aria-labelledby="project-heading"><div class="about-grid"><div><p class="eyebrow">Early days. Real ambition.</p><h2 id="project-heading">One shared discovery layer.</h2><p>SIN is an early-stage project for adult creator discovery. The vision brings together a directory, browser tools, AI agent plugins, and search integrations so creators can be found in more places.</p><p>This repository includes the public name list and a browser name-highlighter prototype. Full creator profiles, integrations, and paid visibility are still planned.</p><p>The proposed $SIN token would support creator registration and participation. Token integration and keyword pricing are still being designed; this repository provides no token implementation or verified contract address.</p><a class="file-link" href="https://github.com/pluginu/sincoin">Explore the project on GitHub ↗</a></div><div aria-label="Project progress"><div class="milestone"><span>Public name list &amp; page search</span><span class="status live">Available</span></div><div class="milestone"><span>Browser name highlighter</span><span class="status live">Prototype</span></div><div class="milestone"><span>Creator profiles &amp; platform links</span><span class="status">Planned</span></div><div class="milestone"><span>AI plugins &amp; search integrations</span><span class="status">Planned</span></div><div class="milestone"><span>Keywords &amp; labeled paid placements</span><span class="status">Planned</span></div><div class="milestone"><span>$SIN registration integration</span><span class="status">Planned</span></div></div></div></section>
+    <section aria-labelledby="join-heading"><div class="join"><div><p class="eyebrow">For creators</p><h2 id="join-heading">Your name belongs here.</h2><p>Missing from the list? Request an addition through a repository issue or pull request with your name and wallet address.</p><div class="actions"><a class="button" href="https://github.com/pluginu/sincoin/issues">Request an addition ↗</a><a class="button secondary" href="https://github.com/pluginu/sincoin/blob/main/README.md">Project details</a></div></div><div><h3>Current listing requirements</h3><ul class="requirements"><li>Hold at least <strong>200,000 SIN69 coins</strong> in your wallet.</li><li>A <strong>0.25 SOL</strong> processing fee is specified for adding a name.</li></ul><p class="small">These are the requirements currently documented by the project and may change. Payment instructions and a receiving wallet address have not yet been published. There is no payment flow on this site.</p></div></div></section>
+  </main>
+  <footer><p><strong>SIN.</strong> &nbsp; Discover. Follow. Support. &nbsp;·&nbsp; For adults 18+</p><div><a href="entertainers.txt">The list</a><a href="https://github.com/pluginu/sincoin">GitHub ↗</a></div></footer>
+</div>
+<script>
+  const search = document.querySelector('#search');
+  const list = document.querySelector('#names');
+  const status = document.querySelector('#results-status');
+  const empty = document.querySelector('#empty');
+  const clear = document.querySelector('#clear');
+  let names = [];
+  const normalize = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  function render() {
+    const query = normalize(search.value);
+    const matches = names.filter(name => normalize(name).includes(query));
+    const fragment = document.createDocumentFragment();
+    for (const name of matches) {
+      const item = document.createElement('li');
+      item.textContent = name;
+      fragment.append(item);
+    }
+    list.replaceChildren(fragment);
+    status.textContent = query ? `${matches.length} of ${names.length} names match your search` : `${names.length} names · A–Z`;
+    empty.hidden = matches.length !== 0;
+    clear.hidden = search.value.length === 0;
+  }
+  search.addEventListener('input', render);
+  clear.addEventListener('click', () => { search.value = ''; render(); search.focus(); });
+  async function loadNames() {
+    try {
+      const response = await fetch('entertainers.txt');
+      if (!response.ok) throw new Error('List unavailable');
+      names = [...new Set((await response.text()).split(/\r?\n/).map(line => line.split(',').map(part => part.trim()).filter(Boolean).join(' ')).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+      search.disabled = false;
+      render();
+    } catch {
+      status.textContent = location.protocol === 'file:' ? 'To use search, open this page through a local web server or a static website host. You can still view or download the file below.' : 'The list could not be loaded. Refresh to try again, or use the file links below.';
+    }
+  }
+  loadNames();
+</script>
+</body>
+</html>
