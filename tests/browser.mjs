@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtemp, cp, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, cp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 const temp = await mkdtemp(path.join(tmpdir(), 'sin-test-'));
@@ -46,12 +46,17 @@ try {
   await popup.locator('#value').fill('[');
   await popup.locator('#save').click();
   await popup.locator('#error').filter({hasText:'Invalid regular expression'}).waitFor();
-  // Change the actual runtime file without reloading the extension.
-  await writeFile(path.join(extension, 'entertainers.txt'), (await readFile('entertainers.txt','utf8')) + '\nRuntime, Person\n');
+  // Apply downloaded names to verify cache notifications update open pages.
+  const refreshNames = async text => worker.evaluate(async text => {
+    const {entertainerCache} = await chrome.storage.local.get('entertainerCache');
+    const names = text.split(/\r?\n/).map(line => line.split(',').map(part => part.trim()).filter(Boolean).join(' ')).filter(Boolean);
+    await chrome.storage.local.set({entertainerCache: {...entertainerCache, names, checkedAt: Date.now()}});
+  }, text);
+  await refreshNames((await readFile('entertainers.txt','utf8')) + '\nRuntime, Person\n');
   await page.evaluate(() => { const p = document.createElement('p'); p.textContent = 'Runtime Person'; document.body.append(p); });
   await page.waitForFunction(() => [...(CSS.highlights.get('sin-names') || [])].some(r => r.toString() === 'Runtime Person'));
-  // Removal must propagate on the periodic scan with no DOM or settings change.
-  await writeFile(path.join(extension, 'entertainers.txt'), await readFile('entertainers.txt','utf8'));
+  // Removal must propagate from the cache notification with no DOM or settings change.
+  await refreshNames(await readFile('entertainers.txt','utf8'));
   await page.waitForFunction(() => CSS.highlights.get('sin-names')?.size === 3, { }, {timeout: 35000});
   // A pathological expression must be terminated without freezing the browsing page.
   await popup.locator('#value').fill('(a+)+$');
@@ -67,7 +72,7 @@ try {
   assert.equal(await page.evaluate(() => 2 + 2), 4);
   await popup.locator('.rule button').filter({hasText:'Delete'}).click();
   await page.waitForFunction(() => CSS.highlights.get('sin-names')?.size === 3);
-  console.log('Browser checks passed: full names, inline text, excluded fields, dynamic content, toggle, rule CRUD/persistence, validation, runtime file edits, regex timeout and recovery.');
+  console.log('Browser checks passed: full names, inline text, excluded fields, dynamic content, toggle, rule CRUD/persistence, validation, hosted list updates, regex timeout and recovery.');
 } finally {
   await context?.close();
   await new Promise(resolve => server.close(resolve));

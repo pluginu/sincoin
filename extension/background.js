@@ -1,10 +1,21 @@
-import { defaults, parseNames } from './matcher.js';
+import { defaults } from './matcher.js';
+import { createNameLoader } from './names.js';
 let creating;
-async function readNames() {
-  const response = await fetch(chrome.runtime.getURL('entertainers.txt'), {cache: 'no-store'});
-  if (!response.ok) throw new Error('Unable to read entertainers.txt.');
-  return parseNames(await response.text());
+const readNames = createNameLoader({storage: chrome.storage.local, fetch, bundledURL: chrome.runtime.getURL('entertainers.txt')});
+const refreshAlarm = 'refresh-entertainers';
+chrome.alarms.onAlarm.addListener(alarm => {
+  if (alarm.name === refreshAlarm) readNames().catch(console.error);
+});
+async function initializeNames() {
+  // Reuse the persisted alarm when Chrome restarts the service worker.
+  if (!await chrome.alarms.get(refreshAlarm)) {
+    await chrome.alarms.create(refreshAlarm, {periodInMinutes: 15});
+  }
+  await readNames();
 }
+chrome.runtime.onStartup.addListener(() => initializeNames().catch(console.error));
+chrome.runtime.onInstalled.addListener(() => initializeNames().catch(console.error));
+initializeNames().catch(console.error);
 async function offscreen() {
   if (await chrome.offscreen.hasDocument()) return;
   if (!creating) creating = chrome.offscreen.createDocument({url: 'extension/offscreen.html', reasons: ['WORKERS'], justification: 'Run text matching in a worker that can be stopped if a regex takes too long.'}).finally(() => { creating = null; });

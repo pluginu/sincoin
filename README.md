@@ -20,11 +20,9 @@ Names are highlighted in gold. The popup shows the number of highlights in the m
 
 ### Runtime entertainer file
 
-`entertainers.txt` is read **at runtime**, with caching disabled, on each page scan. It is not compiled into JavaScript or permanently cached when the extension starts. Each line represents a full name: `Angela, White` becomes `Angela White`, and `Kagney, Linn, Karter` becomes `Kagney Linn Karter`. Matching is case-insensitive and respects word boundaries.
+The extension loads [the hosted entertainer list](https://pluginu.github.io/sincoin/entertainers.txt) on first use and checks for updates every **15 minutes** while Chrome is running. Conditional requests use the server’s ETag and Last-Modified headers so unchanged files need no body download. All tabs share a locally saved list, including across browser restarts. If the site is unavailable, the last saved list remains available; a fresh installation can fall back to the bundled file and retry after 15 minutes. Chrome may delay checks while the device is asleep; overdue checks run when the extension resumes.
 
-Edit the file in the folder loaded into Chrome. Open pages re-scan every 30 seconds, as well as after page content or settings change, so additions and removals take effect without rebuilding or reloading the extension. The popup’s name count is refreshed when it opens.
-
-The file belongs to the **local installed copy**. Changing a GitHub file does not automatically change another user's installed copy. A hosted list endpoint would be needed to distribute live updates to everyone. No remote service is used by this version.
+Update the hosted `entertainers.txt` to distribute additions and removals to installed extensions automatically. Open pages re-scan when the saved names change. The popup’s name count refreshes when it opens. Each line represents a full name: `Angela, White` becomes `Angela White`, and `Kagney, Linn, Karter` becomes `Kagney Linn Karter`. Matching is case-insensitive and respects word boundaries.
 
 ### Custom matching
 
@@ -42,7 +40,7 @@ Up to 100 custom rules are stored locally. Regex runs in a terminable worker; a 
 
 ### Scope and privacy
 
-The extension reads ordinary HTTP/HTTPS page text and keeps all processing on your device. It sends no browsing content to any server. Chrome’s website-access permission is needed to highlight pages automatically. Storage holds your preferences and custom rules; an offscreen document hosts the matching worker.
+The extension reads ordinary HTTP/HTTPS page text and keeps all processing on your device. It sends no browsing content to any server. Chrome’s website-access permission is needed to highlight pages automatically. The extension requests the public entertainer list from GitHub Pages every 15 minutes without sending page text. Storage holds your preferences, custom rules, and cached list; an offscreen document hosts the matching worker.
 
 Chrome internal pages, the Chrome Web Store, the built-in PDF viewer, images, canvas text, and shadow DOM content are not supported. Form fields, editable regions, scripts, and hidden elements are excluded. Highlights use the CSS Custom Highlight API without replacing website text or links. Very large pages are limited to the first 200,000 characters and 5,000 raw matches per frame per scan; the popup reports when the limit is reached.
 
@@ -55,7 +53,7 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitivity, regex validation, overlap handling, and match limits. Browser checks load an isolated copy of the real extension and exercise highlighting, inline text, dynamic pages, excluded fields, toggle behavior, rule editing and persistence, runtime file changes, and regex timeout recovery. No build step is required to load the extension.
+Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitivity, regex validation, overlap handling, and match limits. Browser checks load an isolated copy of the real extension and exercise highlighting, inline text, dynamic pages, excluded fields, toggle behavior, rule editing and persistence, hosted list updates, and regex timeout recovery. No build step is required to load the extension.
 
 ## Entertainer list and requests
 

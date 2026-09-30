@@ -60,6 +60,9 @@
   function changed() { revision++; schedule(); }
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
+    // Timestamp-only refreshes do not change matches or require a new scan.
+    if (Object.keys(changes).every(key => key === 'entertainerCache') &&
+        JSON.stringify(changes.entertainerCache.oldValue?.names) === JSON.stringify(changes.entertainerCache.newValue?.names)) return;
     if (changes.enabled) enabled = changes.enabled.newValue !== false;
     revision++;
     CSS.highlights.delete(key);
