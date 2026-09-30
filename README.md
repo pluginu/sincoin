@@ -70,9 +70,17 @@ The script updates `entertainers.txt` next to the script, keeps existing names f
 If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
 
 - Your wallet must hold at least **200,000 SIN69 coins**.
-- A **0.25 SOL** payment on Solana is required as a processing fee to add your name.
+- Activation currently costs **$25 USD**, payable in equivalent BTC, SOL, ETH, USDC, or USDT on the networks listed on the [payment page](https://pluginu.github.io/sincoin/#activation). USDC or USDT is preferred. Small exchange-rate differences will be honored; pricing may change with volume and the tool’s user base.
 
-These requirements apply for the time being, unless stated otherwise. Submission and payment instructions, including the receiving wallet address, have not yet been published in this repository.
+Public receiving addresses and supported networks are embedded directly in `index.html`. Include your transaction hash, network, name, and public wallet address in a listing request for manual review. Payment does not automatically activate a listing. The SIN69 holding requirement still applies.
+
+### Local payment wallets
+
+`generate_wallets.py` contains setup and run instructions and prints only public addresses. It creates Bitcoin mainnet (native SegWit), Solana, and Ethereum wallets, and reuses them on subsequent runs. USDC/USDT use the receiving address for their respective network.
+
+Private keys live only in `~/.local/share/sincoin/wallets/activation.wallet-private.json`, outside the repository and website, with owner-only permissions. This file is unencrypted: keep a secure backup before accepting funds. It contains Bitcoin WIF, an Ethereum hex private key, and a Solana 64-byte keypair array for wallet recovery/import. Never share or upload it. `.gitignore` also excludes `*.wallet-private.json`, its backups, `.wallets/`, and `.venv/`. Copy only the public output into the HTML if deliberately changing wallets; the page never loads local wallet files.
+
+Supported stablecoin networks were checked against [Circle’s USDC documentation](https://developers.circle.com/stablecoins/usdc-contract-addresses) and [Tether’s supported protocols](https://tether.to/en/supported-protocols/).
 
 ## Why SIN?
 

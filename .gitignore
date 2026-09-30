@@ -5,3 +5,7 @@ dist/
 .DS_Store
 __pycache__/
 *.pyc
+.venv/
+.wallets/
+*.wallet-private.json
+*.wallet-private.json.*
