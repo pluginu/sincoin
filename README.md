@@ -59,6 +59,14 @@ Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitiv
 
 [entertainers.txt](entertainers.txt) is the main file to check whether your name is listed. It contains one entertainer per line, with name parts separated by commas.
 
+To merge new names, put one entertainer per line in `new_entertainers.txt`, then run:
+
+```sh
+python3 merge_entertainers.py new_entertainers.txt
+```
+
+The script updates `entertainers.txt` next to the script, keeps existing names first, and removes duplicates from both lists. Matching ignores capitalization, extra whitespace, and commas, so `Angela White` and `angela, white` count as the same name. Blank lines are skipped and names are saved in comma-separated format. It requires only Python 3. Use `--main path/to/entertainers.txt` to update a different main file.
+
 If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
 
 - Your wallet must hold at least **200,000 SIN69 coins**.
