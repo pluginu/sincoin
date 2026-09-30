@@ -13,7 +13,7 @@ For creators, SIN aims to make it easier to be found through searchable profiles
 1. Download or clone this repository into a folder you will keep on your computer.
 2. Open `chrome://extensions` in Chrome 120 or later and enable **Developer mode**.
 3. Click **Load unpacked** and select the repository folder containing `manifest.json`.
-4. Pin **SIN — Name Highlighter** from Chrome’s extensions menu, then refresh any already-open website tabs.
+4. Pin **sin69** from Chrome’s extensions menu, then refresh any already-open website tabs.
 5. Click the extension to toggle highlighting or add your own rules.
 
 Names are highlighted in gold. The popup shows the number of highlights in the main page; matching frames are highlighted too. Turning the extension off removes highlights from open tabs. You can separately disable the entertainer list and enable, edit, or delete individual custom rules. Changes apply to open pages automatically.
