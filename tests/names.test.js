@@ -48,3 +48,22 @@ test('first offline load uses bundled list and later retries hosted file', async
   time += REFRESH_MS;
   assert.deepEqual(await load(), ['Remote Person']);
 });
+
+test('old caches upgrade and link-only refreshes preserve profile changes', async () => {
+  let time = 1000000;
+  const data = {[CACHE_KEY]: {names: ['Example Person'], etag: 'old', checkedAt: time}};
+  let body = 'Example, Person, https://onlyfans.com/example';
+  const calls = [];
+  const load = createNameLoader({storage: {get: async () => structuredClone(data), set: async value => Object.assign(data, value)},
+    now: () => time, bundledURL: 'bundled', fetch: async (url, init) => {
+      calls.push(init);
+      return new Response(body);
+    }});
+  assert.deepEqual(await load(), ['Example Person']);
+  assert.deepEqual(calls[0].headers, {});
+  assert.equal(data[CACHE_KEY].profiles[0].links[0].platform, 'OnlyFans');
+  time += REFRESH_MS;
+  body = 'Example, Person, https://instagram.com/example';
+  await load();
+  assert.equal(data[CACHE_KEY].profiles[0].links[0].platform, 'Instagram');
+});

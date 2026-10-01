@@ -1,7 +1,9 @@
+import {approvedProfile} from './profile-links.js';
 import { defaults } from './matcher.js';
 import { createNameLoader } from './names.js';
+const platforms = fetch(chrome.runtime.getURL('social-platforms.json')).then(response => response.json());
 let creating;
-const readNames = createNameLoader({storage: chrome.storage.local, fetch, bundledURL: chrome.runtime.getURL('entertainers.txt')});
+const readNames = createNameLoader({storage: chrome.storage.local, fetch, platforms, bundledURL: chrome.runtime.getURL('entertainers.txt')});
 const refreshAlarm = 'refresh-entertainers';
 chrome.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === refreshAlarm) readNames().catch(console.error);
@@ -32,8 +34,10 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
       const settings = await chrome.storage.local.get(defaults);
       if (!settings.enabled) return {ranges: []};
       const rules = [...(settings.includeNames ? (await readNames()).map(value => ({value, mode: 'exact'})) : []), ...settings.rules];
+      const {entertainerCache} = await chrome.storage.local.get('entertainerCache');
+      const profiles = settings.includeNames ? (entertainerCache?.profiles || []).map(p => ({name: p.name, links: p.links.map(link => approvedProfile(link.url)).filter(Boolean)})).filter(p => p.links.length) : [];
       await offscreen();
-      return chrome.runtime.sendMessage({target: 'offscreen', texts: message.texts, rules});
+      return chrome.runtime.sendMessage({target: 'offscreen', texts: message.texts, rules, profiles});
     })().then(reply).catch(e => reply({error: e.message}));
     return true;
   }
