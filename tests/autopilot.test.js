@@ -101,12 +101,12 @@ test('scroll authorization requires the active tab, main frame, and current URL'
   const f = fixture();
   const first = await f.run('start');
   const sender = {tab: {id: first.tabId}, frameId: 0, url: first.url};
-  assert.equal((await f.run('page', sender)).active, true);
+  assert.equal((await f.run('page', {sender})).active, true);
   for (const other of [{...sender, tab: {id: 999}}, {...sender, frameId: 1}, {...sender, url: 'https://example.com/'}]) {
-    assert.equal((await f.run('page', other)).active, false);
+    assert.equal((await f.run('page', {sender: other})).active, false);
   }
   await f.run('stop');
-  assert.equal((await f.run('page', sender)).active, false);
+  assert.equal((await f.run('page', {sender})).active, false);
 });
 
 test('X searches advance names without Google pagination and retain platform after suspension', async () => {
@@ -122,25 +122,39 @@ test('X searches advance names without Google pagination and retain platform aft
   assert.equal(next.tabId, first.tabId);
 });
 
-test('Instagram only visits listed approved profiles, loops, and accepts canonical profile URLs', async () => {
-  const f = fixture(['Angela White', 'Riley Reid', 'Mia Khalifa']);
-  f.options.readProfiles = async () => [
-    {name: 'Angela White', links: [{url: 'https://www.instagram.com/theangelawhite'}]},
-    {name: 'Riley Reid', links: [{url: 'https://instagram.com.evil.test/riley'}]},
-    {name: 'Mia Khalifa', links: [{url: 'https://instagram.com/miakhalifa/'}]}
-  ];
-  const run = createAutopilot(f.options);
-  const first = await run('start', 'instagram');
-  assert.equal(first.url, 'https://www.instagram.com/theangelawhite');
-  assert.equal((await run('page', {frameId: 0, tab: {id: first.tabId}, url: 'https://instagram.com/theangelawhite/'})).active, true);
-  assert.equal((await run('page', {frameId: 0, tab: {id: first.tabId}, url: 'https://instagram.com/accounts/login/'})).active, false);
-  assert.equal((await run('next')).name, 'Mia Khalifa');
-  assert.equal((await run('next')).name, 'Angela White');
+test('Instagram searches every name in the same tab and waits for search before timing', async () => {
+  const f = fixture();
+  const first = await f.run('start', 'instagram');
+  assert.equal(first.url, 'https://www.instagram.com/');
+  assert.equal(first.awaitingSearch, true);
+  assert.equal(f.alarms.size, 0);
+  const sender = {frameId: 0, tab: {id: first.tabId}, url: first.url};
+  for (const url of ['https://instagram.com/accounts/login/', 'https://instagram.com.evil.test/', 'http://instagram.com/']) {
+    assert.equal((await f.run('page', {sender: {...sender, url}, searchedName: first.name})).active, false);
+  }
+  assert.equal(f.alarms.size, 0);
+  assert.equal((await f.run('page', {sender})).name, first.name);
+  await f.run('page', {sender, searchedName: 'wrong name'});
+  assert.equal(f.alarms.size, 0);
+  await f.run('page', {sender, searchedName: first.name});
+  assert.equal((await f.run('status')).awaitingSearch, false);
+  assert.equal(f.alarms.size, 1);
+  f.options.chrome.tabs.update = async (id, data) => {
+    assert.deepEqual(data, {}); // Changing names must not navigate or reload Instagram.
+    return f.tabs.get(id);
+  };
+  const next = await createAutopilot(f.options)('next');
+  assert.equal(next.name, 'Riley Reid');
+  assert.equal(next.tabId, first.tabId);
+  assert.equal(next.awaitingSearch, true);
+  assert.equal((await f.run('next')).name, 'Angela White');
+  await f.run('stop');
+  assert.equal((await f.run('page', {sender, searchedName: first.name})).active, false);
+  assert.equal(f.alarms.size, 0);
 });
 
-test('Instagram without profile links and unknown platforms fail without opening tabs', async () => {
+test('unknown platforms fail without opening tabs', async () => {
   const f = fixture();
-  assert.match((await f.run('start', 'instagram')).error, /No Instagram profile links/);
   assert.match((await f.run('start', 'unknown')).error, /Choose Google, X, or Instagram/);
   assert.equal(f.tabs.size, 0);
 });

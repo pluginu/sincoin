@@ -5,10 +5,7 @@ import {createAutopilot, AUTOPILOT_ALARM} from './autopilot.js';
 const platforms = fetch(chrome.runtime.getURL('social-platforms.json')).then(response => response.json());
 let creating;
 const readNames = createNameLoader({storage: chrome.storage.local, fetch, platforms, bundledURL: chrome.runtime.getURL('entertainers.txt')});
-const autopilot = createAutopilot({chrome, readNames, readProfiles: async () => {
-  const {entertainerCache} = await chrome.storage.local.get('entertainerCache');
-  return entertainerCache?.profiles || [];
-}});
+const autopilot = createAutopilot({chrome, readNames});
 chrome.tabs.onRemoved.addListener(tabId => autopilot('removed', tabId).catch(console.error));
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && (changes.enabled?.newValue === false || changes.includeNames?.newValue === false)) autopilot('stop').catch(console.error);
@@ -36,7 +33,7 @@ async function offscreen() {
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
   if (message.target === 'offscreen') return;
   if (message.type === 'autopilot-page') {
-    autopilot('page', sender).then(reply).catch(() => reply({active: false}));
+    autopilot('page', {sender, searchedName: message.searchedName}).then(reply).catch(() => reply({active: false}));
     return true;
   }
   if (message.type === 'autopilot' && sender.url === chrome.runtime.getURL('extension/popup.html')) {

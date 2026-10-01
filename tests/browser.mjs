@@ -128,7 +128,10 @@ try {
   await popup.locator('#autopilotStatus').filter({hasText: 'Autopilot is off'}).waitFor();
   // Keep social browsing local via intercepted documents, without using accounts.
   await context.route(/^https:\/\/(x\.com|www\.instagram\.com)\//, route => route.fulfill({
-    contentType: 'text/html', body: '<!doctype html><p style="height:5000px">Angela White and Mia Khalifa</p>'
+    contentType: 'text/html', body: route.request().url().includes('instagram.com') ? `<!doctype html>
+      <button onclick="setTimeout(() => document.querySelector('[role=dialog]').hidden = false, 250)"><svg aria-label="Search"></svg>Search</button>
+      <section role="dialog" hidden><input placeholder="Search" oninput="document.querySelector('#results').textContent = this.value; document.body.dataset.query = this.value">
+      <div id="panel" style="height:200px;overflow-y:auto"><p id="results" style="height:5000px"></p></div></section>` : '<!doctype html><p style="height:5000px">Angela White and Mia Khalifa</p>'
   }));
   await worker.evaluate(async () => {
     const {entertainerCache} = await chrome.storage.local.get('entertainerCache');
@@ -150,19 +153,29 @@ try {
     await popup.locator('#autopilot:not(:disabled)').waitFor();
     const destination = await worker.evaluate(async () => (await chrome.storage.session.get('autopilot')).autopilot.url);
     await social.goto(destination);
-    await social.waitForFunction(() => window.scrollY > 100);
+    if (platform === 'instagram') {
+      await social.waitForFunction(name => document.body.dataset.query === name, firstSearch);
+      await social.waitForFunction(() => document.querySelector('#panel').scrollTop > 100);
+    } else await social.waitForFunction(() => window.scrollY > 100);
     assert.equal(new URL(social.url()).hostname, platform === 'x' ? 'x.com' : 'www.instagram.com');
     assert.equal(await popup.locator('#autopilotPlatform').isDisabled(), true);
     const initialURL = social.url();
     await worker.evaluate(() => chrome.alarms.create('autopilot-next', {when: Date.now() + 100}));
-    await social.waitForURL(url => url.href !== initialURL);
-    await social.waitForFunction(() => window.scrollY > 100);
+    if (platform === 'instagram') {
+      await social.waitForFunction(name => document.body.dataset.query && document.body.dataset.query !== name, firstSearch);
+      assert.equal(social.url(), initialURL);
+    } else {
+      await social.waitForURL(url => url.href !== initialURL);
+      await social.waitForFunction(() => window.scrollY > 100);
+    }
     await popup.locator('#autopilot').uncheck();
     await popup.locator('#autopilotPlatform:not(:disabled)').waitFor();
     await social.waitForTimeout(500);
-    const position = await social.evaluate(() => window.scrollY);
+    const position = await social.evaluate(() => document.querySelector('#panel')?.scrollTop ?? window.scrollY);
+    const query = await social.evaluate(() => document.body.dataset.query);
     await social.waitForTimeout(2500);
-    assert.equal(await social.evaluate(() => window.scrollY), position);
+    assert.equal(await social.evaluate(() => document.querySelector('#panel')?.scrollTop ?? window.scrollY), position);
+    assert.equal(await social.evaluate(() => document.body.dataset.query), query);
     await social.close();
   }
   // A pathological expression must be terminated without freezing the browsing page.
