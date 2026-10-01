@@ -196,7 +196,7 @@
 
 
 
-      <div><p class="eyebrow">The spotlight is yours</p><h1>Discover.<br>Follow.<br><span>Support.</span></h1><p class="intro">Great creators deserve to be found. SIN is building tools to connect you with adult entertainers and creators, wherever you browse. A new stage for adult creator discovery and advertising.</p><div class="actions"><a class="button" href="#directory">Explore the names <span aria-hidden="true">↗</span></a><a class="button secondary" href="https://pump.fun/coin/QteALBkDWA8P5eBXWNeDHQ7gH9gTjsRbiHCdBUtpump" target="_blank" rel="noopener noreferrer">Buy SIN69 ↗</a></div></div>
+      <div><p class="eyebrow">The spotlight is yours</p><h1>Discover.<br>Follow.<br><span>Support.</span></h1><p class="intro">Great creators deserve to be found. SIN is building tools to connect you with adult entertainers and creators, wherever you browse. A new stage for adult creator discovery and advertising.</p><div class="actions"><a class="button" href="#directory">Explore the names <span aria-hidden="true">↗</span></a></div></div>
 
 
 
@@ -212,7 +212,7 @@
 
 
 
-    <section class="coin-panel" id="coin" aria-labelledby="coin-heading"><div><p class="eyebrow">SIN coin · SIN69</p><h2 id="coin-heading">Step into the SIN community.</h2><span class="contract-label">Solana contract address</span><code class="contract-address" id="contract-address">QteALBkDWA8P5eBXWNeDHQ7gH9gTjsRbiHCdBUtpump</code><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p></div><div class="actions"><a class="button" href="https://pump.fun/coin/QteALBkDWA8P5eBXWNeDHQ7gH9gTjsRbiHCdBUtpump" target="_blank" rel="noopener noreferrer">Buy SIN69 on pump.fun ↗</a><button class="button secondary" id="copy-contract" type="button">Copy contract address</button></div></section>
+    <section class="coin-panel" id="coin" aria-labelledby="coin-heading"><div><p class="eyebrow">SIN coin · SIN69</p><h2 id="coin-heading">Step into the SIN community.</h2><p>CA will be published once the token is live.</p></div></section>
 
 
 
@@ -292,7 +292,7 @@
 
 
 
-    <section id="project" aria-labelledby="project-heading"><div class="about-grid"><div><p class="eyebrow">Early days. Real ambition.</p><h2 id="project-heading">One shared discovery layer.</h2><p>SIN is an early-stage project for adult creator discovery. The vision brings together a directory, browser tools, AI agent plugins, and search integrations so creators can be found in more places.</p><p>This repository includes the public name list and a browser name-highlighter prototype. Name detail pages and platform links are available; richer profiles, integrations, and paid visibility are still planned.</p><p>SIN69 is the SIN community coin. Find its contract address and pump.fun purchase link above. Creator registration integration and keyword pricing are still being designed.</p><a class="file-link" href="https://github.com/pluginu/sincoin">Explore the project on GitHub ↗</a></div><div aria-label="Project progress"><div class="milestone"><span>Public name list & page search</span><span class="status live">Available</span></div><div class="milestone"><span>Browser name highlighter</span><span class="status live">Prototype</span></div><div class="milestone"><span>Name details & platform links</span><span class="status live">Available</span></div><div class="milestone"><span>AI plugins & search integrations</span><span class="status">Planned</span></div><div class="milestone"><span>Keywords & labeled paid placements</span><span class="status">Planned</span></div><div class="milestone"><span>$SIN registration integration</span><span class="status">Planned</span></div></div></div></section>
+    <section id="project" aria-labelledby="project-heading"><div class="about-grid"><div><p class="eyebrow">Early days. Real ambition.</p><h2 id="project-heading">One shared discovery layer.</h2><p>SIN is an early-stage project for adult creator discovery. The vision brings together a directory, browser tools, AI agent plugins, and search integrations so creators can be found in more places.</p><p>This repository includes the public name list and a browser name-highlighter prototype. Name detail pages and platform links are available; richer profiles, integrations, and paid visibility are still planned.</p><p>SIN69 is the SIN community coin. CA will be published once the token is live. Creator registration integration and keyword pricing are still being designed.</p><a class="file-link" href="https://github.com/pluginu/sincoin">Explore the project on GitHub ↗</a></div><div aria-label="Project progress"><div class="milestone"><span>Public name list & page search</span><span class="status live">Available</span></div><div class="milestone"><span>Browser name highlighter</span><span class="status live">Prototype</span></div><div class="milestone"><span>Name details & platform links</span><span class="status live">Available</span></div><div class="milestone"><span>AI plugins & search integrations</span><span class="status">Planned</span></div><div class="milestone"><span>Keywords & labeled paid placements</span><span class="status">Planned</span></div><div class="milestone"><span>$SIN registration integration</span><span class="status">Planned</span></div></div></div></section>
 
 
 
@@ -485,70 +485,6 @@
 
 
     });
-
-
-
-  });
-
-
-
-  const copyButton = document.querySelector('#copy-contract');
-
-
-
-  copyButton.addEventListener('click', async () => {
-
-
-
-    const address = document.querySelector('#contract-address');
-
-
-
-    const message = document.querySelector('#copy-status');
-
-
-
-    try {
-
-
-
-      await navigator.clipboard.writeText(address.textContent.trim());
-
-
-
-      message.textContent = 'Contract address copied.';
-
-
-
-    } catch {
-
-
-
-      const selection = window.getSelection();
-
-
-
-      const range = document.createRange();
-
-
-
-      range.selectNodeContents(address);
-
-
-
-      selection.removeAllRanges();
-
-
-
-      selection.addRange(range);
-
-
-
-      message.textContent = 'Address selected. Press and hold to copy, or use Ctrl/Cmd+C.';
-
-
-
-    }
 
 
 
