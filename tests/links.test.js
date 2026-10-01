@@ -27,14 +27,19 @@ test('merge by name, keep distinct links, and exclude links from extension names
   const dir = mkdtempSync(join(tmpdir(), 'sin-merge-'));
   try {
     const main = join(dir,'main.txt'), incoming = join(dir,'new.txt');
-    writeFileSync(main, 'Example, Creator, twitter.com/example\n');
-    writeFileSync(incoming, '1. example creator, x.com/example, instagram: @example\n2) New Name, example.org\n');
+    writeFileSync(main, 'uncategorized, Example Creator, twitter.com/example\n');
+    writeFileSync(incoming, '1. gay, example creator, x.com/example, instagram: @example\n2) straight, New Name, example.org\n');
     execFileSync('python3',['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]);
     const saved = readFileSync(main,'utf8');
-    assert.equal(saved, 'Example, Creator, https://x.com/example, https://instagram.com/example\nNew, Name, https://example.org/\n');
+    assert.equal(saved, 'gay, Example Creator, https://x.com/example, https://instagram.com/example\nstraight, New Name, https://example.org/\n');
     execFileSync('python3',['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]);
     assert.equal(readFileSync(main,'utf8'), saved);
-    writeFileSync(incoming, 'Bad Name, @ambiguous\n');
+    for (const line of ['stright, Example Creator', 'Example Creator', 'gay,']) {
+      writeFileSync(incoming, line);
+      assert.equal(spawnSync('python3', ['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]).status, 1);
+      assert.equal(readFileSync(main, 'utf8'), saved);
+    }
+    writeFileSync(incoming, 'gay, Bad Name, @ambiguous\n');
     assert.equal(spawnSync('python3',['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]).status, 1);
     assert.equal(readFileSync(main,'utf8'), saved);
   } finally { rmSync(dir,{recursive:true,force:true}); }
@@ -54,25 +59,33 @@ test('merge enforces URL ownership atomically across both input files', () => {
   const dir = mkdtempSync(join(tmpdir(), 'sin-ownership-'));
   try {
     const main = join(dir, 'main.txt'), incoming = join(dir, 'new.txt');
-    const original = 'First, Creator, https://x.com/Example\n';
+    const original = 'uncategorized, First Creator, https://x.com/Example\n';
     writeFileSync(main, original);
     for (const variant of ['x: @example', 'http://www.twitter.com/EXAMPLE/?utm_source=test#bio', 'https://x.com/example']) {
-      writeFileSync(incoming, `New Person, instagram: @newperson\nOther Person, ${variant}\n`);
+      writeFileSync(incoming, `gay, New Person, instagram: @newperson\nstraight, Other Person, ${variant}\n`);
       const result = spawnSync('python3', ['-B', 'scripts/merge_entertainers.py', incoming, '--main', main], {encoding:'utf8'});
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /new.txt:2:.*already belongs to First Creator/);
+      assert.match(result.stderr, /new.txt:2:.*belongs to both First Creator and Other Person/);
       assert.equal(readFileSync(main, 'utf8'), original);
     }
-    writeFileSync(incoming, 'First Creator, http://twitter.com/example/\n');
+    writeFileSync(incoming, 'uncategorized, First Creator, https://x.com/Example\n');
     execFileSync('python3', ['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]);
     assert.equal(readFileSync(main, 'utf8'), original);
-    writeFileSync(incoming, 'Other Person, onlyfans: @unique\nThird Person, onlyfans.com/UNIQUE/\n');
+    writeFileSync(incoming, 'gay, Other Person, onlyfans: @unique\ntransgender, Third Person, onlyfans.com/UNIQUE/\n');
     assert.equal(spawnSync('python3', ['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]).status, 1);
     assert.equal(readFileSync(main, 'utf8'), original);
-    writeFileSync(main, original + 'Other Person, twitter.com/example\n');
-    writeFileSync(incoming, 'New Person\n');
+    writeFileSync(main, original + 'gay, Other Person, twitter.com/example\n');
+    writeFileSync(incoming, 'straight, New Person\n');
     const before = readFileSync(main, 'utf8');
     assert.equal(spawnSync('python3', ['-B', 'scripts/merge_entertainers.py', incoming, '--main', main]).status, 1);
     assert.equal(readFileSync(main, 'utf8'), before);
   } finally { rmSync(dir, {recursive:true, force:true}); }
+});
+
+ test('category prefixes do not become extension names', () => {
+  for (const category of ['straight', 'gay', 'transgender', 'uncategorized']) {
+    const line = `${category.toUpperCase()}, Example Creator, x.com/example`;
+    assert.equal(parseLine(line, platforms).category, category);
+    assert.deepEqual(parseNames(line), ['Example Creator']);
+  }
 });

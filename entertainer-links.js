@@ -14,6 +14,9 @@ export function linkKey(link) {
 }
 
 export function parseLine(line, platforms = []) {
+  const prefix = line.match(/^\s*(straight|gay|transgender|uncategorized)\s*,/i);
+  const category = prefix ? prefix[1].toLowerCase() : 'uncategorized';
+  if (prefix) line = line.slice(prefix[0].length);
   const name = [], links = [], issues = [];
   const aliases = new Map(platforms.flatMap(p => p.aliases.map(a => [a, p])));
   for (const token of line.match(/[^\s,]+:\s+@?[^\s,]+|[^\s,]+/g) || []) {
@@ -43,7 +46,7 @@ export function parseLine(line, platforms = []) {
       if (!links.some(link => linkKey(link) === linkKey(url.href))) links.push(url.href);
     } catch { issues.push(`Invalid URL: ${token}`); }
   }
-  return {name: name.join(' '), links, issues};
+  return {name: name.join(' '), category, links, issues};
 }
 
 export function platformFor(url, platforms) {

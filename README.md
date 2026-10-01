@@ -37,13 +37,13 @@ Hover a highlighted entertainer name to open a dark and gold profile card when a
 
 The extension uses a separate strict allowlist in `extension/profile-links.js`. It accepts direct HTTPS profiles on approved social and creator platforms, including OnlyFans, Instagram, X, Fansly, and Pornhub. It rejects arbitrary websites, unapproved subdomains, lookalike domains, credentials, nonstandard ports, query strings, fragments, shorteners, and link aggregators. Only listed profile path formats are accepted. Platform approval does not verify account ownership or guarantee the content of the destination. The website’s broader link support is unchanged.
 
-Profile links use the same bundled/hosted `entertainers.txt` and refresh cache as names. Add full URLs or labeled handles to a person’s row, for example `Example, Creator, instagram: @example, onlyfans.com/example`. Existing installations fetch profile data on their next scan after reloading the extension.
+Profile links use the same bundled/hosted `entertainers.txt` and refresh cache as names. Add full URLs or labeled handles to a person’s row, for example `uncategorized, Example Creator, instagram: @example, onlyfans.com/example`. Existing installations fetch profile data on their next scan after reloading the extension.
 
 ### Runtime entertainer file
 
 The extension loads [the hosted entertainer list](https://pluginu.github.io/sincoin/entertainers.txt) on first use and checks for updates every **15 minutes** while Chrome is running. Conditional requests use the server’s ETag and Last-Modified headers so unchanged files need no body download. All tabs share a locally saved list, including across browser restarts. If the site is unavailable, the last saved list remains available; a fresh installation can fall back to the bundled file and retry after 15 minutes. Chrome may delay checks while the device is asleep; overdue checks run when the extension resumes.
 
-Update the hosted `entertainers.txt` to distribute additions and removals to installed extensions automatically. Open pages re-scan when the saved names change. The popup’s name count refreshes when it opens. Each line represents a full name: `Angela, White` becomes `Angela White`, and `Kagney, Linn, Karter` becomes `Kagney Linn Karter`. Matching is case-insensitive and respects word boundaries.
+Update the hosted `entertainers.txt` to distribute additions and removals to installed extensions automatically. Open pages re-scan when the saved names change. The popup’s name count refreshes when it opens. Category prefixes are excluded from name matching. Legacy lines remain readable: `Angela, White` becomes `Angela White`, and `Kagney, Linn, Karter` becomes `Kagney Linn Karter`. Matching is case-insensitive and respects word boundaries.
 
 ### Custom matching
 
@@ -78,15 +78,15 @@ Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitiv
 
 ## Entertainer list and requests
 
-[entertainers.txt](entertainers.txt) is the main file to check whether your name is listed. It contains one entertainer per line, with name parts separated by commas.
+[entertainers.txt](entertainers.txt) is the main file to check whether your name is listed. It contains one entertainer per line: `category, Full Name, URL, URL`. Standard categories are `straight`, `gay`, `transgender`, and `uncategorized`. Categories are supplied explicitly, not inferred; existing entries start as `uncategorized`. Only apply identity labels supported by the entertainer’s own public identification. These categories are directory tags, not mutually exclusive identity definitions. The website allows any combination of categories; all are selected initially.
 
-To merge new names, put one entertainer per line in `new_entertainers.txt`, then run:
+To merge new names, use the same category-first format for each line in `new_entertainers.txt`, then run:
 
 ```sh
 python3 -B scripts/merge_entertainers.py new_entertainers.txt
 ```
 
-The script updates `entertainers.txt` in the repository root, keeps existing names first, and removes duplicates from both lists. Matching ignores capitalization, extra whitespace, and commas, so `Angela White` and `angela, white` count as the same name. Blank lines are skipped and names are saved in comma-separated format. It requires only Python 3. Use `--main path/to/entertainers.txt` to update a different main file.
+The script updates `entertainers.txt` in the repository root, keeps existing names first, and removes duplicates from both lists. Matching ignores capitalization, extra whitespace, and commas, so `Angela White` and `angela, white` count as the same name. Blank lines are skipped. Mixed-category batches are supported, so no batch category argument is needed. Incoming categories replace existing categories for the same name. Missing or invalid categories stop the merge before writing; accepted categories are saved in lowercase. It requires only Python 3. Use `--main path/to/entertainers.txt` to update a different main file.
 
 If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
 
@@ -178,8 +178,8 @@ Ideas, feedback, and contributions are welcome through repository issues and pul
 Select a directory name in `index.html` to open a shareable `#entertainer=Name` detail view. Every supplied link has a platform symbol or initials; other websites use a globe. The page's **Supported social & website links** section lists all 60 recognized platforms and links to their sites. The registry lives in `social-platforms.json` and is shared by the Python importer and website.
 
 ```text
-Example, Creator, x.com/example, instagram: @example, onlyfans.com/example
-Another Creator, https://www.pornhub.com/model/example, https://example.org
+uncategorized, Example Creator, x.com/example, instagram: @example, onlyfans.com/example
+uncategorized, Another Creator, https://www.pornhub.com/model/example, https://example.org
 ```
 
 URLs may include or omit `https://`. Labeled handles use a registry alias followed by a colon, e.g. `ig: @example`, `twitter: example`, or `fansly: @example`. Bare `@handles` are ambiguous and must be labeled. Platforms with multiple profile formats require a full profile URL; no account ownership is inferred. HTTP and HTTPS websites outside the registry are supported too. Commas separate fields; encode literal commas in URLs as `%2C`.

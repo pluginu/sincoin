@@ -11,7 +11,7 @@ Rules:
 - A profile URL cannot belong to two different entertainers.
 
 Output format:
-Full Name, URL, URL, URL
+category, Full Name, URL, URL, URL
 """
 
 import argparse
@@ -26,6 +26,22 @@ from urllib.parse import urlsplit
 sys.dont_write_bytecode = True
 
 from entertainer_links import parse_line, link_key
+
+
+CATEGORIES = {"straight", "gay", "transgender", "uncategorized"}
+
+
+def parse_record(line):
+    if not line.strip():
+        return "uncategorized", "", []
+    category, separator, rest = line.partition(",")
+    category = category.strip().lower()
+    if not separator or category not in CATEGORIES:
+        raise ValueError("First field must be straight, gay, transgender, or uncategorized")
+    name, links = parse_line(rest)
+    if not name:
+        raise ValueError("A category must be followed by an entertainer name")
+    return category, name, links
 
 
 def normalized_domain(url):
@@ -112,7 +128,7 @@ def rebuild_owners(records):
     owners = {}
 
     for key, record in records.items():
-        name, links = record
+        name, links, category = record
         for link in links:
             identity = link_key(link)
             owner = owners.get(identity)
@@ -140,7 +156,7 @@ def merge_entertainers(new_file, main_file):
     # Load the existing file first.
     for number, line in enumerate(existing.splitlines(), 1):
         try:
-            name, links = parse_line(line)
+            category, name, links = parse_record(line)
         except ValueError as error:
             raise ValueError(f"{main_file}:{number}: {error}") from error
 
@@ -152,10 +168,10 @@ def merge_entertainers(new_file, main_file):
 
         if key in records:
             duplicates += 1
-            old_name, old_links = records[key]
-            records[key] = [old_name, update_links(old_links, links)]
+            old_name, old_links, old_category = records[key]
+            records[key] = [old_name, update_links(old_links, links), category]
         else:
-            records[key] = [name, links]
+            records[key] = [name, links, category]
 
     # Validate the existing data before applying updates.
     rebuild_owners(records)
@@ -165,7 +181,7 @@ def merge_entertainers(new_file, main_file):
         line = re.sub(r"^\s*\d+[.)]?\s+", "", line)
 
         try:
-            name, links = parse_line(line)
+            category, name, links = parse_record(line)
         except ValueError as error:
             raise ValueError(f"{new_file}:{number}: {error}") from error
 
@@ -177,15 +193,15 @@ def merge_entertainers(new_file, main_file):
 
         if key in records:
             duplicates += 1
-            old_name, old_links = records[key]
+            old_name, old_links, old_category = records[key]
             merged_links = update_links(old_links, links)
 
-            if merged_links != old_links:
+            if merged_links != old_links or category != old_category:
                 updated += 1
 
-            records[key] = [old_name, merged_links]
+            records[key] = [old_name, merged_links, category]
         else:
-            records[key] = [name, links]
+            records[key] = [name, links, category]
             added += 1
 
         # Validate after each incoming record so errors identify the relevant line.
@@ -202,8 +218,8 @@ def merge_entertainers(new_file, main_file):
 
     # Preserve the full entertainer name as ONE field.
     lines = [
-        ", ".join([name] + links)
-        for name, links in records.values()
+        ", ".join([category, name] + links)
+        for name, links, category in records.values()
     ]
 
     # Atomically replace the main file in the same directory.
@@ -264,7 +280,7 @@ def main():
 
     print(f"Saved {total} unique entertainers to {args.main}")
     print(f"Added {added} new entertainers.")
-    print(f"Updated {updated} existing entertainers with new/replacement links.")
+    print(f"Updated {updated} existing entertainers with category or link changes.")
     print(f"Merged {duplicates} duplicate-name entries.")
 
 

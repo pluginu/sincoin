@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const server = createServer(async (req,res) => {
   const file = new URL(req.url,'http://localhost').pathname.slice(1) || 'index.html';
   try {
-    const body = file === 'entertainers.txt' ? 'Example, Creator, x.com/example, instagram: @example, https://www.pornhub.com/model/example, https://example.org\nNo, Links\n' : await readFile(file);
+    const body = file === 'entertainers.txt' ? 'gay, Example Creator, x.com/example, instagram: @example, https://www.pornhub.com/model/example, https://example.org\ntransgender, No Links\n' : await readFile(file);
     res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.json') ? 'application/json' : file.endsWith('.html') ? 'text/html' : 'text/plain');
     res.end(body);
   } catch { res.statusCode = 404; res.end(); }
@@ -20,6 +20,13 @@ try {
   await page.goto(url);
   await page.locator('#names a').first().waitFor();
   assert.equal(await page.locator('#names a').count(),2);
+  await page.locator('#categories input[value="gay"]').uncheck();
+  assert.equal(await page.locator('#names a').count(), 1);
+  await page.locator('#search').fill('Example');
+  assert.equal(await page.locator('#names a').count(), 0);
+  await page.locator('#categories input[value="gay"]').check();
+  assert.equal(await page.locator('#names a').count(), 1);
+  await page.locator('#search').fill('');
   await page.getByRole('link',{name:'Example Creator',exact:true}).click();
   await page.locator('#detail-links a').first().waitFor();
   assert.equal(await page.locator('#detail-name').textContent(),'Example Creator');
