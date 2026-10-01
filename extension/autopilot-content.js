@@ -1,5 +1,5 @@
 (() => {
-  if (window.top !== window || location.pathname !== '/search') return;
+  if (window.top !== window || (location.pathname !== '/search' && !['instagram.com', 'www.instagram.com'].includes(location.hostname))) return;
   let stopped = false;
   chrome.runtime.onMessage.addListener((message, sender, reply) => {
     if (message.type !== 'autopilot-next-page') return;

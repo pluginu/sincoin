@@ -18,7 +18,7 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 // cannot reach Google before Playwright attaches network interception.
 const searchOrigin = `http://127.0.0.1:${server.address().port}`;
 const autopilotPath = path.join(extension, 'extension/autopilot.js');
-await writeFile(autopilotPath, (await readFile(autopilotPath, 'utf8')).replace('https://www.google.com/search?', `${searchOrigin}/search?`));
+await writeFile(autopilotPath, (await readFile(autopilotPath, 'utf8')).replace('https://www.google.com/search?', `${searchOrigin}/search?`).replace('chrome.tabs.create({url, active: true})', "chrome.tabs.create({url: platform === 'google' ? url : 'about:blank', active: true})"));
 let context;
 try {
   context = await chromium.launchPersistentContext(path.join(temp,'profile'), {channel:'chromium',headless:true,args:[`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});
@@ -126,6 +126,45 @@ try {
   await secondDemo.waitForFunction(() => CSS.highlights.get('sin-names')?.size > 0);
   await secondDemo.close();
   await popup.locator('#autopilotStatus').filter({hasText: 'Autopilot is off'}).waitFor();
+  // Keep social browsing local via intercepted documents, without using accounts.
+  await context.route(/^https:\/\/(x\.com|www\.instagram\.com)\//, route => route.fulfill({
+    contentType: 'text/html', body: '<!doctype html><p style="height:5000px">Angela White and Mia Khalifa</p>'
+  }));
+  await worker.evaluate(async () => {
+    const {entertainerCache} = await chrome.storage.local.get('entertainerCache');
+    await chrome.storage.local.set({entertainerCache: {...entertainerCache, profiles: [
+      {name: 'Angela White', links: [{url: 'https://www.instagram.com/theangelawhite/'}]},
+      {name: 'Mia Khalifa', links: [{url: 'https://www.instagram.com/miakhalifa/'}]}
+    ]}});
+  });
+  for (const platform of ['x', 'instagram']) {
+    await popup.locator('#autopilotPlatform').selectOption(platform);
+    await popup.reload();
+    await popup.locator('#autopilot:not(:disabled)').waitFor();
+    assert.equal(await popup.locator('#autopilotPlatform').inputValue(), platform);
+    const opened = context.waitForEvent('page');
+    await popup.locator('#autopilot').check();
+    const social = await opened;
+    // Extension-created tabs can send their first request before Playwright
+    // attaches routing. Social fixture tabs start blank in the copied extension.
+    await popup.locator('#autopilot:not(:disabled)').waitFor();
+    const destination = await worker.evaluate(async () => (await chrome.storage.session.get('autopilot')).autopilot.url);
+    await social.goto(destination);
+    await social.waitForFunction(() => window.scrollY > 100);
+    assert.equal(new URL(social.url()).hostname, platform === 'x' ? 'x.com' : 'www.instagram.com');
+    assert.equal(await popup.locator('#autopilotPlatform').isDisabled(), true);
+    const initialURL = social.url();
+    await worker.evaluate(() => chrome.alarms.create('autopilot-next', {when: Date.now() + 100}));
+    await social.waitForURL(url => url.href !== initialURL);
+    await social.waitForFunction(() => window.scrollY > 100);
+    await popup.locator('#autopilot').uncheck();
+    await popup.locator('#autopilotPlatform:not(:disabled)').waitFor();
+    await social.waitForTimeout(500);
+    const position = await social.evaluate(() => window.scrollY);
+    await social.waitForTimeout(2500);
+    assert.equal(await social.evaluate(() => window.scrollY), position);
+    await social.close();
+  }
   // A pathological expression must be terminated without freezing the browsing page.
   await popup.locator('#mode').selectOption('regex');
   await popup.locator('#value').fill('(a+)+$');

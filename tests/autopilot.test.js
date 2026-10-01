@@ -108,3 +108,39 @@ test('scroll authorization requires the active tab, main frame, and current URL'
   await f.run('stop');
   assert.equal((await f.run('page', sender)).active, false);
 });
+
+test('X searches advance names without Google pagination and retain platform after suspension', async () => {
+  const f = fixture();
+  f.options.chrome.tabs.sendMessage = async () => { throw new Error('Should not request pagination'); };
+  const first = await f.run('start', 'x');
+  assert.equal(first.platform, 'x');
+  assert.equal(new URL(first.url).origin, 'https://x.com');
+  assert.equal(new URL(first.url).searchParams.get('q'), 'Angela White');
+  const next = await createAutopilot(f.options)('next');
+  assert.equal(next.name, 'Riley Reid');
+  assert.equal(next.platform, 'x');
+  assert.equal(next.tabId, first.tabId);
+});
+
+test('Instagram only visits listed approved profiles, loops, and accepts canonical profile URLs', async () => {
+  const f = fixture(['Angela White', 'Riley Reid', 'Mia Khalifa']);
+  f.options.readProfiles = async () => [
+    {name: 'Angela White', links: [{url: 'https://www.instagram.com/theangelawhite'}]},
+    {name: 'Riley Reid', links: [{url: 'https://instagram.com.evil.test/riley'}]},
+    {name: 'Mia Khalifa', links: [{url: 'https://instagram.com/miakhalifa/'}]}
+  ];
+  const run = createAutopilot(f.options);
+  const first = await run('start', 'instagram');
+  assert.equal(first.url, 'https://www.instagram.com/theangelawhite');
+  assert.equal((await run('page', {frameId: 0, tab: {id: first.tabId}, url: 'https://instagram.com/theangelawhite/'})).active, true);
+  assert.equal((await run('page', {frameId: 0, tab: {id: first.tabId}, url: 'https://instagram.com/accounts/login/'})).active, false);
+  assert.equal((await run('next')).name, 'Mia Khalifa');
+  assert.equal((await run('next')).name, 'Angela White');
+});
+
+test('Instagram without profile links and unknown platforms fail without opening tabs', async () => {
+  const f = fixture();
+  assert.match((await f.run('start', 'instagram')).error, /No Instagram profile links/);
+  assert.match((await f.run('start', 'unknown')).error, /Choose Google, X, or Instagram/);
+  assert.equal(f.tabs.size, 0);
+});

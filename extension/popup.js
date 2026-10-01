@@ -2,19 +2,36 @@ import { compileRule } from './matcher.js';
 const $ = id => document.getElementById(id);
 const hints = {exact: 'Matches a whole word or phrase: “Ann” will not match “Anna”.', contains: 'Matches anywhere in text: “ann” also matches “Joanna”.', starts: 'Matches at the start of a word: “Ang” matches the Ang in Angela.', ends: 'Matches at the end of a word: “ley” matches the ley in Riley.', regex: 'JavaScript expression, without / delimiters. Example: Angela\\s+White. Global + Unicode flags are automatic.'};
 let settings, editing = null;
+const platformLabels = {google: 'Google', x: 'X', instagram: 'Instagram'};
+function describeAutopilot() {
+  $('autopilotDescription').textContent = {
+    google: 'Search names and scroll through up to 3 result pages per name, advancing every 30 seconds.',
+    x: 'Search each name on X and scroll the results for 30 seconds before moving to the next name.',
+    instagram: 'Scroll each linked Instagram profile for 30 seconds. Names without Instagram links are skipped.'
+  }[$('autopilotPlatform').value];
+}
+$('autopilotPlatform').onchange = async () => {
+  describeAutopilot();
+  try { await chrome.storage.local.set({autopilotPlatform: $('autopilotPlatform').value}); }
+  catch (error) { $('autopilotStatus').textContent = error.message; }
+};
 function renderAutopilot(state) {
+  if (state.running) $('autopilotPlatform').value = state.platform || 'google';
+  $('autopilotPlatform').disabled = !!state.running;
+  describeAutopilot();
   $('autopilot').checked = !!state.running;
-  $('autopilotStatus').textContent = state.error || (state.running ? `Now browsing: ${state.name} · page ${state.page || 1}` : 'Autopilot is off');
+  $('autopilotStatus').textContent = state.error || (state.running ? `Now browsing ${platformLabels[state.platform || 'google']}: ${state.name}${(!state.platform || state.platform === 'google') ? ` · page ${state.page || 1}` : ''}` : 'Autopilot is off');
 }
 $('autopilot').onchange = async () => {
   $('autopilot').disabled = true;
+  $('autopilotPlatform').disabled = true;
   try {
-    renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: $('autopilot').checked ? 'start' : 'stop'}));
+    renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: $('autopilot').checked ? 'start' : 'stop', platform: $('autopilotPlatform').value}));
     const response = await chrome.runtime.sendMessage({type: 'config'});
     if (response.error) throw new Error(response.error);
     settings = response.settings; render(); await refreshStatus();
   } catch (error) { $('autopilotStatus').textContent = error.message; }
-  finally { $('autopilot').disabled = false; }
+  finally { $('autopilot').disabled = false; $('autopilotPlatform').disabled = $('autopilot').checked; }
 };
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.autopilot) renderAutopilot(changes.autopilot.newValue || {});
@@ -75,6 +92,8 @@ try {
   if (response.error) throw new Error(response.error);
   settings = response.settings; $('nameCount').textContent = `${response.names.length} names`;
   render(); hint(); await refreshStatus(); setInterval(refreshStatus, 1200);
+  const {autopilotPlatform} = await chrome.storage.local.get('autopilotPlatform');
+  $('autopilotPlatform').value = platformLabels[autopilotPlatform] ? autopilotPlatform : 'google';
   renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: 'status'}));
   $('autopilot').disabled = false;
 } catch (error) { fail(error); }
