@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "sin69",
+  "name": "SIN",
   "version": "1.0.0",
   "description": "Highlight entertainer names and your own matching rules as you browse.",
   "minimum_chrome_version": "120",
@@ -15,7 +15,7 @@
   "background": {"service_worker": "extension/background.js", "type": "module"},
   "action": {
     "default_popup": "extension/popup.html",
-    "default_title": "sin69",
+    "default_title": "SIN",
     "default_icon": {
       "16": "extension/icons/icon-16.png",
       "32": "extension/icons/icon-32.png",

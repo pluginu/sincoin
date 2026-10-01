@@ -20,7 +20,7 @@ For creators, SIN aims to make it easier to be found through searchable profiles
 2. Open `chrome://extensions` in Chrome 120 or later and enable **Developer mode**.
 3. Click **Load unpacked** and select the repository folder containing `manifest.json`.
    If loading reports a reserved `__pycache__` name, remove that generated cache folder and retry. Python helpers live in `scripts/`; use the commands below with `-B` to avoid generating bytecode caches.
-4. Pin **sin69** from Chrome’s extensions menu, then refresh any already-open website tabs.
+4. Pin **SIN** from Chrome’s extensions menu, then refresh any already-open website tabs.
 5. Click the extension to toggle highlighting or add your own rules.
 
 Names are highlighted in gold. The popup shows the number of highlights in the main page; matching frames are highlighted too. Turning the extension off removes highlights from open tabs. You can separately disable the entertainer list and enable, edit, or delete individual custom rules. Changes apply to open pages automatically.
@@ -90,10 +90,10 @@ The script updates `entertainers.txt` in the repository root, keeps existing nam
 
 If your name is missing, you can request to have it added by submitting a repository issue or pull request with your name and wallet address. The current requirements are:
 
-- Your wallet must hold at least **200,000 SIN69 coins**.
+- Your wallet must hold at least **200,000 SIN coins**.
 - Activation currently costs **$25 USD**, payable in equivalent BTC, SOL, ETH, USDC, or USDT on the networks listed on the [payment page](https://pluginu.github.io/sincoin/#activation). USDC or USDT is preferred. Small exchange-rate differences will be honored; pricing may change with volume and the tool’s user base.
 
-Public receiving addresses and supported networks are embedded directly in `index.html`. Include your transaction hash, network, name, and public wallet address in a listing request for manual review. Payment does not automatically activate a listing. The SIN69 holding requirement still applies.
+Public receiving addresses and supported networks are embedded directly in `index.html`. Include your transaction hash, network, name, and public wallet address in a listing request for manual review. Payment does not automatically activate a listing. The SIN holding requirement still applies.
 
 ### Local payment wallets
 
