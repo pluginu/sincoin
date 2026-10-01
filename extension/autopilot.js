@@ -1,10 +1,11 @@
+import {profileURL} from './profile-store.js';
 export const AUTOPILOT_ALARM = 'autopilot-next';
 const KEY = 'autopilot';
 const idle = {running: false, tabId: null, name: '', index: -1};
 
 // Session storage survives service-worker suspension without restarting a demo
 // when the user opens a new browser session. Serialize timer and popup actions.
-export function createAutopilot({chrome, readNames}) {
+export function createAutopilot({chrome, readNames, profiles}) {
   let pending = Promise.resolve();
   const state = async () => (await chrome.storage.session.get(KEY))[KEY] || {...idle};
   const save = async value => { await chrome.storage.session.set({[KEY]: value}); return value; };
@@ -21,10 +22,28 @@ export function createAutopilot({chrome, readNames}) {
         !/^\/(accounts|challenge)(\/|$)/.test(page.pathname);
     } catch { return false; }
   }
-  async function pageState({sender, searchedName, token, instagramProgress}) {
+  async function pageState({sender, searchedName, token, instagramProgress, profile, profileURLs}) {
     let current = await state();
     const active = !!(current.running && sender?.frameId === 0 &&
       sender.tab?.id === current.tabId && matchesPage(current, sender.url));
+    let knownProfiles;
+    if (active && token === current.token && current.platform === 'instagram' && profiles) {
+      if (profile) {
+        const progress = current.instagramProgress;
+        const expected = progress?.profiles?.[progress.profileIndex];
+        if (['profile', 'return-profile'].includes(progress?.phase) && profileURL(sender.url) &&
+            profileURL(profile.url) === profileURL(sender.url) &&
+            profileURL(sender.url) === profileURL(`https://www.instagram.com${expected}/`)) {
+          try {
+            await profiles.capture({...profile, name: current.name, visitedAt: new Date().toISOString()});
+          } catch (error) {
+            await stop(`Could not save profile: ${error.message}. Download a backup or free extension storage before restarting.`);
+            return {active: false};
+          }
+        }
+      }
+      if (Array.isArray(profileURLs)) knownProfiles = await profiles.known(profileURLs.slice(0, 5));
+    }
     // Keep a watchdog for stalled pages; normal Instagram progress advances after browsing posts.
     if (active && token === current.token && current.platform === 'instagram' && current.awaitingSearch && searchedName === current.name) {
       current = await save({...current, awaitingSearch: false});
@@ -38,7 +57,7 @@ export function createAutopilot({chrome, readNames}) {
       }
       current = await save({...current, instagramProgress});
     }
-    return active ? {active, name: current.name, platform: current.platform, token: current.token, instagramProgress: current.instagramProgress} : {active: false};
+    return active ? {active, knownProfiles, name: current.name, platform: current.platform, token: current.token, instagramProgress: current.instagramProgress} : {active: false};
   }
 
   async function advance(start = false, selectedPlatform = 'google') {

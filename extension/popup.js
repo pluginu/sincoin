@@ -1,3 +1,4 @@
+import {PROFILE_KEY, MAX_IMPORT_BYTES, hasProfileInfo} from './profile-store.js';
 import { compileRule } from './matcher.js';
 const $ = id => document.getElementById(id);
 const hints = {exact: 'Matches a whole word or phrase: “Ann” will not match “Anna”.', contains: 'Matches anywhere in text: “ann” also matches “Joanna”.', starts: 'Matches at the start of a word: “Ang” matches the Ang in Angela.', ends: 'Matches at the end of a word: “ley” matches the ley in Riley.', regex: 'JavaScript expression, without / delimiters. Example: Angela\\s+White. Global + Unicode flags are automatic.'};
@@ -7,7 +8,7 @@ function describeAutopilot() {
   $('autopilotDescription').textContent = {
     google: 'Search names and scroll through up to 3 result pages per name, advancing every 30 seconds.',
     x: 'Search each name on X and scroll the results for 30 seconds before moving to the next name.',
-    instagram: 'Search each name, visit up to 5 user results, and open up to 2 posts per profile for 6 seconds each. Private or empty profiles are skipped. Sign in to Instagram first.'
+    instagram: 'Search each name, visit up to 5 user results, and open up to 2 posts per profile for 6 seconds each. Saves profile details and skips profiles already collected. Private or empty profiles can still have visible details saved. Sign in to Instagram first.'
   }[$('autopilotPlatform').value];
 }
 $('autopilotPlatform').onchange = async () => {
@@ -36,6 +37,7 @@ $('autopilot').onchange = async () => {
   finally { $('autopilot').disabled = false; $('autopilotPlatform').disabled = $('autopilot').checked; }
 };
 chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes[PROFILE_KEY]) renderProfiles(changes[PROFILE_KEY].newValue || []);
   if (area === 'session' && changes.autopilot) renderAutopilot(changes.autopilot.newValue || {});
   if (area === 'local' && settings) {
     for (const key of ['enabled', 'includeNames', 'rules']) if (changes[key]) settings[key] = changes[key].newValue;
@@ -99,3 +101,37 @@ try {
   renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: 'status'}));
   $('autopilot').disabled = false;
 } catch (error) { fail(error); }
+
+function renderProfiles(profiles) {
+  $('profileCount').textContent = `${profiles.length} saved · ${profiles.filter(hasProfileInfo).length} ready to skip`;
+}
+async function profileRequest(action, data) {
+  const response = await chrome.runtime.sendMessage({type: 'profile-data', action, data});
+  if (response.error) throw new Error(response.error);
+  return response.data;
+}
+$('exportProfiles').onclick = async () => {
+  try {
+    const data = await profileRequest('export');
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = `sin-profiles-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    $('profileDataStatus').textContent = `Download started: ${data.profiles.length} profiles.`;
+  } catch (error) { $('profileDataStatus').textContent = error.message; }
+};
+$('importProfiles').onclick = () => $('profileFile').click();
+$('profileFile').onchange = async () => {
+  const file = $('profileFile').files[0];
+  if (!file) return;
+  $('importProfiles').disabled = true;
+  try {
+    if (file.size > MAX_IMPORT_BYTES) throw new Error('Choose a backup smaller than 8 MB.');
+    const result = await profileRequest('import', JSON.parse(await file.text()));
+    $('profileDataStatus').textContent = `Upload complete: ${result.count} profiles saved. Existing profiles merged.`;
+  } catch (error) { $('profileDataStatus').textContent = `Upload failed: ${error.message}`; }
+  finally { $('importProfiles').disabled = false; $('profileFile').value = ''; }
+};
+chrome.storage.local.get(PROFILE_KEY).then(data => renderProfiles(data[PROFILE_KEY] || []))
+  .catch(error => { $('profileDataStatus').textContent = error.message; });

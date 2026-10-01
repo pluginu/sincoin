@@ -35,7 +35,7 @@ function fixture(url) {
   const user = pathname.match(/^\/user(\d+)\/$/)?.[1];
   const post = /^\/(p|reel)\//.test(pathname);
   return `<!doctype html><html><body>${search}<nav><a href="/myself/">My profile</a></nav>
-    ${post ? '<article>Opened post content</article>' : user ? `<main>${user === '2' ? 'This account is private' :
+    ${post ? '<article>Opened post content</article>' : user ? `<main><header><h2>user${user}</h2><ul><li>10 posts</li><li><a href="/user${user}/followers/"><span title="1,234">1.2K</span> followers</a></li><li><a href="/user${user}/following/">56 following</a></li></ul><div class="biography">Bio for user ${user}. Contact user${user}@example.com</div><a href="mailto:user${user}@example.com">Email</a><a href="tel:+15551234567">Call</a><a href="https://example.com/user${user}">Website</a></header>${user === '2' ? 'This account is private' :
       `<a href="/p/user${user}a/">First post</a><a href="/reel/user${user}b/">Second post</a><a href="/p/user${user}c/">Third post</a>`}</main>` : '<main>Home</main>'}
     <button onclick="sessionStorage.setItem('engagement', 'clicked')">Like</button>
     <button onclick="sessionStorage.setItem('engagement', 'clicked')">Follow</button>
@@ -87,6 +87,8 @@ try {
   assert.equal((await getState()).running, false);
   await first.page.close();
 
+  // Clear the first stopped run's saved profile to verify a full new collection.
+  await worker.evaluate(() => chrome.storage.local.remove('autopilotProfiles'));
   const {page, state} = await start();
   const visited = [];
   page.on('framenavigated', frame => { if (frame === page.mainFrame()) visited.push(new URL(frame.url()).pathname); });
@@ -104,6 +106,33 @@ try {
   assert.ok(!visited.some(value => /user[67]|user\dc|explore|myself/.test(value)), 'only five users and two posts per public profile');
   assert.equal(await page.evaluate(() => sessionStorage.getItem('engagement')), null);
   assert.ok(await page.locator('input[placeholder="Search"]').isVisible(), 'return to search after browsing');
+  const saved = await worker.evaluate(async () => (await chrome.storage.local.get('autopilotProfiles')).autopilotProfiles);
+  assert.equal(saved.length, 5);
+  assert.equal(saved[0].bio, 'Bio for user 1. Contact user1@example.com');
+  assert.equal(saved[0].followers, 1234);
+  assert.equal(saved[0].following, 56);
+  assert.deepEqual(saved[0].contact.emails, ['user1@example.com']);
+  assert.deepEqual(saved[0].contact.phones, ['+15551234567']);
+  assert.deepEqual(saved[0].contact.links, ['https://example.com/user1']);
+  assert.equal(saved[1].followers, 1234, 'private profile still captured');
+  await expect(popup.locator('#profileCount')).toHaveText('5 saved · 5 ready to skip');
+  const downloadPromise = popup.waitForEvent('download');
+  await popup.locator('#exportProfiles').click();
+  const download = await downloadPromise;
+  const backup = JSON.parse(await readFile(await download.path(), 'utf8'));
+  assert.equal(backup.profiles.length, 5);
+  await worker.evaluate(() => chrome.storage.local.remove('autopilotProfiles'));
+  await popup.locator('#profileFile').setInputFiles({name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup))});
+  await expect(popup.locator('#profileDataStatus')).toContainText('Upload complete: 5');
+  await popup.locator('#profileFile').setInputFiles({name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"format":"bad"}')});
+  await expect(popup.locator('#profileDataStatus')).toContainText('Upload failed');
+  const restored = await start();
+  const reopened = [];
+  restored.page.on('framenavigated', frame => { if (frame === restored.page.mainFrame()) reopened.push(new URL(frame.url()).pathname); });
+  await expect.poll(async () => (await getState()).name, {timeout: 30000}).not.toBe(restored.state.name);
+  await popup.locator('#autopilot').uncheck();
+  assert.ok(!reopened.some(value => /^\/user\d+\/$/.test(value)), 'restored complete profiles skipped before visiting');
+  console.log('Capture, backup download, restore, invalid import, and restored-profile skipping passed.');
   console.log('Instagram browser checks passed: five users, two posts, private profile skipping, full navigation, SPA modals, reload recovery, stop, and next name.');
 } finally {
   await context?.close();

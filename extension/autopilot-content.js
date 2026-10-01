@@ -102,9 +102,16 @@
       const results = userResults();
       const profiles = progress.profiles || [...new Set(results.map(link => userPath(link.href)))].slice(0, 5);
       const target = profiles[progress.profileIndex];
+      const known = await chrome.runtime.sendMessage({type: 'autopilot-page', token: state.token,
+        profileURLs: target ? [`https://www.instagram.com${target}/`] : []});
+      if (stopped || !known.active || known.token !== state.token) return;
+      if (known.knownProfiles?.length) {
+        await transition({phase: 'search', profiles, profileIndex: progress.profileIndex + 1});
+        return;
+      }
       const link = results.find(link => userPath(link.href) === target);
       if (link) {
-        await transition({...progress, profiles, phase: 'profile', posts: null, postIndex: 0}, () => link.click());
+        await transition({...progress, profiles, phase: 'profile', captured: false, posts: null, postIndex: 0}, () => link.click());
       } else if (expired) {
         if (progress.profiles) await nextProfile();
         else await transition({phase: 'done'});
@@ -117,12 +124,21 @@
         return;
       }
       if (now - progress.since < INSTAGRAM_RESULTS_WAIT) return;
+      let captured = progress.captured;
+      if (!captured) {
+        const profileData = globalThis.sinProfileCapture.capture(state.name);
+        const complete = profileData.bio !== null && profileData.followers !== null && profileData.following !== null;
+        if (!complete && !expired) return;
+        const reply = await chrome.runtime.sendMessage({type: 'autopilot-page', token: state.token, profile: profileData});
+        if (stopped || !reply.active || reply.token !== state.token) return;
+        captured = true;
+      }
       const links = linksIn(document.querySelector('main, [role="main"]'), postPath);
       const posts = progress.posts || [...new Set(links.map(link => postPath(link.href)))].slice(0, 2);
       const postIndex = progress.phase === 'return-profile' ? progress.postIndex + 1 : 0;
       const link = links.find(link => postPath(link.href) === posts[postIndex]);
       if (link) {
-        await transition({...progress, posts, postIndex, phase: 'post'}, () => link.click());
+        await transition({...progress, captured, posts, postIndex, phase: 'post'}, () => link.click());
       } else if ((progress.posts && postIndex >= posts.length) || expired) {
         await nextProfile(); // Private, empty, or unavailable profiles are skipped.
       }

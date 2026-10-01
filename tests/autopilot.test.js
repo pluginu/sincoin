@@ -183,3 +183,32 @@ test('Instagram progress survives worker restart and rejects stale or unauthoriz
   await resumed('stop');
   assert.equal((await resumed('page', {sender, token: next.token, instagramProgress: progress})).active, false);
 });
+
+test('profile capture and skip lookup require active tab, token and expected profile', async () => {
+  const f = fixture();
+  const captured = [];
+  const run = createAutopilot({...f.options, profiles: {capture: async value => captured.push(value), known: async urls => urls}});
+  const first = await run('start', 'instagram');
+  const sender = {frameId: 0, tab: {id: first.tabId}, url: 'https://www.instagram.com/example/'};
+  await run('page', {sender, token: first.token, instagramProgress: {phase: 'profile', profiles: ['/example'], profileIndex: 0}});
+  const payload = {sender, token: first.token, profile: {url: sender.url}, profileURLs: [sender.url]};
+  for (const invalid of [{...payload, token: 'old'}, {...payload, sender: {...sender, frameId: 1}}, {...payload, profile: {url: 'https://instagram.com/other/'}}]) await run('page', invalid);
+  assert.equal(captured.length, 0);
+  assert.deepEqual((await run('page', payload)).knownProfiles, [sender.url]);
+  assert.equal(captured.length, 1);
+  assert.equal(captured[0].name, first.name);
+  await run('stop');
+  await run('page', payload);
+  assert.equal(captured.length, 1);
+});
+
+test('storage failures stop autopilot with a visible error instead of silently losing records', async () => {
+  const f = fixture();
+  const run = createAutopilot({...f.options, profiles: {capture: async () => { throw new Error('Quota exceeded'); }}});
+  const state = await run('start', 'instagram');
+  const sender = {frameId: 0, tab: {id: state.tabId}, url: 'https://www.instagram.com/example/'};
+  await run('page', {sender, token: state.token, instagramProgress: {phase: 'profile', profiles: ['/example'], profileIndex: 0}});
+  assert.equal((await run('page', {sender, token: state.token, profile: {url: sender.url}})).active, false);
+  assert.equal((await run('status')).running, false);
+  assert.match((await run('status')).error, /Quota exceeded/);
+});

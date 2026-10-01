@@ -3,3 +3,5 @@
 .autopilot{padding:14px;border:1px solid #453653;border-radius:10px;background:#211b2a}.autopilot-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.autopilot h2{margin:0}.autopilot p{font-size:12px;color:#cfc5dc}.autopilot small{color:#aaa2b5;font-size:11px}#autopilotStatus{margin-bottom:0;color:#ddbdff;overflow-wrap:anywhere}.switch input:disabled+span{opacity:.5}
 
 .brand img{display:block;border-radius:8px}
+
+.profile-data{padding:14px;border:1px solid #453653;border-radius:10px}.profile-data small{color:#aaa2b5}#profileDataStatus{overflow-wrap:anywhere;color:#ddbdff;font-size:12px}button:disabled{opacity:.5;cursor:default}
