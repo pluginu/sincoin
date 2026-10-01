@@ -68,3 +68,43 @@ test('a stop queued during startup wins over startup and subsequent ticks', asyn
   assert.equal((await f.run('status')).running, false);
   assert.equal(f.alarms.size, 0);
 });
+
+test('browses three result pages before changing names, including after worker suspension', async () => {
+  const f = fixture();
+  const first = await f.run('start');
+  f.options.chrome.tabs.sendMessage = async id => {
+    const url = new URL(f.tabs.get(id).url);
+    url.searchParams.set('start', Number(url.searchParams.get('start') || 0) + 10);
+    return {url: url.href};
+  };
+  assert.equal((await f.run('next')).page, 2);
+  const resumed = createAutopilot(f.options);
+  assert.equal((await resumed('next')).page, 3);
+  const next = await resumed('next');
+  assert.equal(next.name, 'Riley Reid');
+  assert.equal(next.page, 1);
+  assert.equal(next.tabId, first.tabId);
+});
+
+test('rejects unrelated or backwards pagination links', async () => {
+  for (const target of ['https://evil.test/search?q=Angela+White&start=10',
+    'https://www.google.com/search?q=Other&start=10',
+    'https://www.google.com/search?q=Angela+White&start=0']) {
+    const f = fixture();
+    await f.run('start');
+    f.options.chrome.tabs.sendMessage = async () => ({url: target});
+    assert.equal((await f.run('next')).name, 'Riley Reid');
+  }
+});
+
+test('scroll authorization requires the active tab, main frame, and current URL', async () => {
+  const f = fixture();
+  const first = await f.run('start');
+  const sender = {tab: {id: first.tabId}, frameId: 0, url: first.url};
+  assert.equal((await f.run('page', sender)).active, true);
+  for (const other of [{...sender, tab: {id: 999}}, {...sender, frameId: 1}, {...sender, url: 'https://example.com/'}]) {
+    assert.equal((await f.run('page', other)).active, false);
+  }
+  await f.run('stop');
+  assert.equal((await f.run('page', sender)).active, false);
+});

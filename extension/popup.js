@@ -4,7 +4,7 @@ const hints = {exact: 'Matches a whole word or phrase: “Ann” will not match 
 let settings, editing = null;
 function renderAutopilot(state) {
   $('autopilot').checked = !!state.running;
-  $('autopilotStatus').textContent = state.error || (state.running ? `Now browsing: ${state.name}` : 'Autopilot is off');
+  $('autopilotStatus').textContent = state.error || (state.running ? `Now browsing: ${state.name} · page ${state.page || 1}` : 'Autopilot is off');
 }
 $('autopilot').onchange = async () => {
   $('autopilot').disabled = true;

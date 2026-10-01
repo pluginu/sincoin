@@ -32,6 +32,10 @@ async function offscreen() {
 }
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
   if (message.target === 'offscreen') return;
+  if (message.type === 'autopilot-page') {
+    autopilot('page', sender).then(reply).catch(() => reply({active: false}));
+    return true;
+  }
   if (message.type === 'autopilot' && sender.url === chrome.runtime.getURL('extension/popup.html')) {
     const action = ['start', 'stop'].includes(message.action) ? message.action : 'status';
     autopilot(action).then(reply).catch(e => reply({error: e.message}));

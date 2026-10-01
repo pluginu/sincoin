@@ -12,7 +12,7 @@ await cp('entertainer-links.js', path.join(extension, 'entertainer-links.js'));
 await cp('social-platforms.json', path.join(extension, 'social-platforms.json'));
 await cp('manifest.json', path.join(extension, 'manifest.json'));
 await cp('entertainers.txt', path.join(extension, 'entertainers.txt'));
-const server = createServer((req,res) => {res.setHeader('Content-Type','text/html'); const query = new URL(req.url, 'http://localhost').searchParams.get('q'); if (query) { res.end(`<!doctype html><p>${query.replace(/[<>&]/g, '')}</p>`); return; } res.end('<!doctype html><p>Angela <b>White</b>, Riley Reid, Joanna and Anna.</p><textarea>Angela White</textarea><div contenteditable="true">Riley Reid</div><div hidden>Stoya</div>');});
+const server = createServer((req,res) => {res.setHeader('Content-Type','text/html'); const query = new URL(req.url, 'http://localhost').searchParams.get('q'); if (query) { res.end(`<!doctype html><p style="min-height:4000px">${query.replace(/[<>&]/g, '')}</p><a id="pnnext" href="/search?${new URLSearchParams({q: query, start: String(Number(new URL(req.url, 'http://localhost').searchParams.get('start') || 0) + 10)})}">Next</a>`); return; } res.end('<!doctype html><p>Angela <b>White</b>, Riley Reid, Joanna and Anna.</p><textarea>Angela White</textarea><div contenteditable="true">Riley Reid</div><div hidden>Stoya</div>');});
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 // Point the copied extension at the local search fixture so newly created tabs
 // cannot reach Google before Playwright attaches network interception.
@@ -97,6 +97,14 @@ try {
   await demo.waitForFunction(() => CSS.highlights.get('sin-names')?.size > 0);
   const firstSearch = new URL(demo.url()).searchParams.get('q');
   await popup.locator('#autopilotStatus').filter({hasText: firstSearch}).waitFor();
+  await demo.waitForFunction(() => window.scrollY > 100);
+  assert.equal(await page.evaluate(() => window.scrollY), 0);
+  for (const offset of ['10', '20']) {
+    await worker.evaluate(() => chrome.alarms.create('autopilot-next', {when: Date.now() + 100}));
+    await demo.waitForURL(url => url.searchParams.get('start') === offset);
+    assert.equal(new URL(demo.url()).searchParams.get('q'), firstSearch);
+    await demo.waitForFunction(() => window.scrollY > 100);
+  }
   // Accelerate the real alarm to verify background wiring without a 30-second wait.
   await worker.evaluate(() => chrome.alarms.create('autopilot-next', {when: Date.now() + 100}));
   await demo.waitForURL(url => url.searchParams.get('q') !== firstSearch);
@@ -106,6 +114,10 @@ try {
   await popup.locator('#autopilot').uncheck();
   await popup.locator('#autopilotStatus').filter({hasText: 'Autopilot is off'}).waitFor();
   assert.equal(await worker.evaluate(() => chrome.alarms.get('autopilot-next')), undefined);
+  await demo.waitForTimeout(500);
+  const stoppedScroll = await demo.evaluate(() => window.scrollY);
+  await demo.waitForTimeout(2500);
+  assert.equal(await demo.evaluate(() => window.scrollY), stoppedScroll);
   await demo.close();
   const secondOpened = context.waitForEvent('page');
   await popup.locator('#autopilot').check();
