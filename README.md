@@ -27,9 +27,9 @@ Names are highlighted in gold. The popup shows the number of highlights in the m
 
 ### Autopilot demo
 
-Choose **Google Search**, **X**, or **Instagram** in the extension popup, then turn on **Autopilot demo**. The selection is saved; switch the demo off before changing it. All three platforms search names from the entertainer list. Instagram opens its website, clicks Search, and enters each name in the search box; profile links are not required. Sign in to Instagram so its search controls are available. It enables highlighting and the entertainer list, opens a dedicated tab, and scrolls down each results page. On Google, about every 30 seconds it follows the next results page when available, browsing up to three pages per name before searching the next name and eventually looping back to the beginning. Matching names in search results use the existing gold highlights. The demo continues with the popup closed; the selected site receives each request normally. X scrolls for 30 seconds per name. Instagram scrolls the search results panel and advances 30 seconds after the name is entered; it waits when search is unavailable. Social sites may require you to sign in.
+Choose **Google Search**, **X**, or **Instagram** in the extension popup, then turn on **Autopilot demo**. The selection is saved; switch the demo off before changing it. All three platforms search names from the entertainer list. Instagram opens its website, clicks Search, and enters each name in the search box; profile links are not required. Sign in to Instagram so its search controls are available. It enables highlighting and the entertainer list, opens a dedicated tab, and scrolls down each results page. On Google, about every 30 seconds it follows the next results page when available, browsing up to three pages per name before searching the next name and eventually looping back to the beginning. Matching names in search results use the existing gold highlights. The demo continues with the popup closed; the selected site receives each request normally. X scrolls for 30 seconds per name. Instagram visits up to the first five distinct user results and opens up to two posts or reels from each profile, pausing for six seconds per post. It returns to Search between profiles and moves to the next name after finishing. Private, empty, missing, or unavailable profiles are skipped after a loading timeout; it waits when search is unavailable. Progress survives page navigation and service-worker suspension. Social sites may require you to sign in.
 
-Switch Autopilot off, close its tab, or disable highlighting/the entertainer list to stop. Stopping leaves the current results open and highlighting enabled. The demo does not resume after restarting Chrome. Chrome may delay the timer while asleep; Google consent, network errors, or CAPTCHA pages may need manual attention. The demo only navigates searches and scrolls; it does not like, follow, comment, or message.
+Switch Autopilot off, close its tab, or disable highlighting/the entertainer list to stop. Stopping leaves the current results open and highlighting enabled. The demo does not resume after restarting Chrome. Chrome may delay the timer while asleep; Google consent, network errors, or CAPTCHA pages may need manual attention. The demo browses searches, profiles, and posts; it does not like, follow, comment, or message.
 
 ### Hover profile links
 
@@ -72,6 +72,7 @@ npm install
 npm test
 npx playwright install chromium
 npm run test:browser
+npm run test:instagram
 ```
 
 Unit tests cover list parsing, matching modes, Unicode boundaries, case sensitivity, regex validation, overlap handling, and match limits. Browser checks load an isolated copy of the real extension and exercise highlighting, inline text, dynamic pages, excluded fields, toggle behavior, rule editing and persistence, hosted list updates, and regex timeout recovery. No build step is required to load the extension.

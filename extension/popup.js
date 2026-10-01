@@ -7,7 +7,7 @@ function describeAutopilot() {
   $('autopilotDescription').textContent = {
     google: 'Search names and scroll through up to 3 result pages per name, advancing every 30 seconds.',
     x: 'Search each name on X and scroll the results for 30 seconds before moving to the next name.',
-    instagram: 'Open Instagram Search and enter each name, then scroll results for 30 seconds. Sign in to Instagram first.'
+    instagram: 'Search each name, visit up to 5 user results, and open up to 2 posts per profile for 6 seconds each. Private or empty profiles are skipped. Sign in to Instagram first.'
   }[$('autopilotPlatform').value];
 }
 $('autopilotPlatform').onchange = async () => {
@@ -20,7 +20,9 @@ function renderAutopilot(state) {
   $('autopilotPlatform').disabled = !!state.running;
   describeAutopilot();
   $('autopilot').checked = !!state.running;
-  $('autopilotStatus').textContent = state.error || (state.running && state.awaitingSearch ? `Waiting for Instagram Search: ${state.name} · sign in if prompted` : state.running ? `Now browsing ${platformLabels[state.platform || 'google']}: ${state.name}${(!state.platform || state.platform === 'google') ? ` · page ${state.page || 1}` : ''}` : 'Autopilot is off');
+  const progress = state.instagramProgress;
+  const browsing = progress?.profiles?.length ? ` · profile ${Math.min(progress.profileIndex + 1, progress.profiles.length)}/${progress.profiles.length}${['post', 'viewing', 'return-profile'].includes(progress.phase) ? ` · post ${(progress.postIndex || 0) + 1}/${progress.posts?.length || 0}` : ''}` : '';
+  $('autopilotStatus').textContent = state.error || (state.running && state.awaitingSearch ? `Waiting for Instagram Search: ${state.name} · sign in if prompted` : state.running ? `Now browsing ${platformLabels[state.platform || 'google']}: ${state.name}${browsing}${(!state.platform || state.platform === 'google') ? ` · page ${state.page || 1}` : ''}` : 'Autopilot is off');
 }
 $('autopilot').onchange = async () => {
   $('autopilot').disabled = true;

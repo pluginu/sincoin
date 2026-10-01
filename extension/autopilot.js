@@ -21,16 +21,24 @@ export function createAutopilot({chrome, readNames}) {
         !/^\/(accounts|challenge)(\/|$)/.test(page.pathname);
     } catch { return false; }
   }
-  async function pageState({sender, searchedName}) {
+  async function pageState({sender, searchedName, token, instagramProgress}) {
     let current = await state();
     const active = !!(current.running && sender?.frameId === 0 &&
       sender.tab?.id === current.tabId && matchesPage(current, sender.url));
-    // Start the dwell timer only once Instagram has accepted the current search.
-    if (active && current.platform === 'instagram' && current.awaitingSearch && searchedName === current.name) {
+    // Keep a watchdog for stalled pages; normal Instagram progress advances after browsing posts.
+    if (active && token === current.token && current.platform === 'instagram' && current.awaitingSearch && searchedName === current.name) {
       current = await save({...current, awaitingSearch: false});
-      await chrome.alarms.create(AUTOPILOT_ALARM, {delayInMinutes: 0.5});
+      await chrome.alarms.create(AUTOPILOT_ALARM, {delayInMinutes: 5});
     }
-    return active ? {active, name: current.name, platform: current.platform} : {active: false};
+    // A stopped or superseded document cannot resume an old browsing sequence.
+    if (active && token === current.token && current.platform === 'instagram' && instagramProgress) {
+      if (instagramProgress.phase === 'done') {
+        await advance();
+        return {active: false};
+      }
+      current = await save({...current, instagramProgress});
+    }
+    return active ? {active, name: current.name, platform: current.platform, token: current.token, instagramProgress: current.instagramProgress} : {active: false};
   }
 
   async function advance(start = false, selectedPlatform = 'google') {
@@ -64,7 +72,8 @@ export function createAutopilot({chrome, readNames}) {
         : `https://www.google.com/search?${new URLSearchParams({q: name})}`;
       if (start) await chrome.storage.local.set({enabled: true, includeNames: true});
       const tab = start ? await chrome.tabs.create({url, active: true}) : await chrome.tabs.update(previous.tabId, platform === 'instagram' ? {} : {url});
-      const current = await save({running: true, tabId: tab.id, name, index, url, platform, awaitingSearch: platform === 'instagram', page: 1, error: ''});
+      if (platform === 'instagram') await chrome.alarms.clear(AUTOPILOT_ALARM);
+      const current = await save({running: true, token: crypto.randomUUID(), tabId: tab.id, name, index, url, platform, awaitingSearch: platform === 'instagram', page: 1, error: ''});
       if (platform !== 'instagram') await chrome.alarms.create(AUTOPILOT_ALARM, {delayInMinutes: 0.5});
       return current;
     } catch (error) {

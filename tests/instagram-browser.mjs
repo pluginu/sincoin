@@ -1,0 +1,111 @@
+import { chromium, expect } from '@playwright/test';
+import assert from 'node:assert/strict';
+import { mkdtemp, cp, readFile, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
+const temp = await mkdtemp(path.join(tmpdir(), 'sin-instagram-'));
+const extension = path.join(temp, 'extension');
+await cp('extension', path.join(extension, 'extension'), {recursive: true});
+for (const file of ['entertainer-links.js', 'social-platforms.json', 'manifest.json', 'entertainers.txt']) {
+  await cp(file, path.join(extension, file));
+}
+// Shorten only the copied extension's waits, keeping all clicks and navigation real.
+const contentPath = path.join(extension, 'extension/autopilot-content.js');
+await writeFile(contentPath, (await readFile(contentPath, 'utf8'))
+  .replace('INSTAGRAM_POST_DWELL = 6000', 'INSTAGRAM_POST_DWELL = 300')
+  .replace('INSTAGRAM_LOAD_WAIT = 12000', 'INSTAGRAM_LOAD_WAIT = 1500')
+  .replace('INSTAGRAM_RESULTS_WAIT = 3000', 'INSTAGRAM_RESULTS_WAIT = 200')
+  .replaceAll('setTimeout(step, 2000)', 'setTimeout(step, 100)'));
+const autopilotPath = path.join(extension, 'extension/autopilot.js');
+await writeFile(autopilotPath, (await readFile(autopilotPath, 'utf8'))
+  .replace('chrome.tabs.create({url, active: true})', "chrome.tabs.create({url: 'about:blank', active: true})"));
+
+const search = `<button id="open-search" onclick="document.querySelector('#search-panel').hidden=false">Search</button>
+<section id="search-panel" role="dialog" hidden><input placeholder="Search" oninput="showResults(this.value)"><div id="results"></div></section>
+<script>
+function showResults(name) {
+  document.body.dataset.query = name;
+  document.querySelector('#results').innerHTML = '<a href="/explore/tags/test/">Tag</a><a href="https://instagram.com.evil.test/fake/">External</a>' +
+    Array.from({length: 7}, (_, i) => '<a href="/user' + (i + 1) + '/">User ' + (i + 1) + '</a>').join('') + '<a href="/user1/">Duplicate</a>';
+}
+</script>`;
+function fixture(url) {
+  const pathname = new URL(url).pathname;
+  const user = pathname.match(/^\/user(\d+)\/$/)?.[1];
+  const post = /^\/(p|reel)\//.test(pathname);
+  return `<!doctype html><html><body>${search}<nav><a href="/myself/">My profile</a></nav>
+    ${post ? '<article>Opened post content</article>' : user ? `<main>${user === '2' ? 'This account is private' :
+      `<a href="/p/user${user}a/">First post</a><a href="/reel/user${user}b/">Second post</a><a href="/p/user${user}c/">Third post</a>`}</main>` : '<main>Home</main>'}
+    <button onclick="sessionStorage.setItem('engagement', 'clicked')">Like</button>
+    <button onclick="sessionStorage.setItem('engagement', 'clicked')">Follow</button>
+    <script>
+    // One profile uses SPA post modals; the others use full document navigation.
+    if (${user === '4'}) {
+      document.querySelector('main').addEventListener('click', event => {
+        const link = event.target.closest('a');
+        if (!link) return;
+        event.preventDefault(); history.pushState({}, '', link.href);
+        const dialog = document.createElement('div'); dialog.setAttribute('role', 'dialog');
+        dialog.innerHTML = '<article>Modal post content</article><button aria-label="Close" onclick="history.back()">Close</button>';
+        document.body.append(dialog);
+      });
+      addEventListener('popstate', () => document.querySelector('[role=dialog]:not(#search-panel)')?.remove());
+    }
+    </script></body></html>`;
+}
+let context;
+try {
+  context = await chromium.launchPersistentContext(path.join(temp, 'profile'), {
+    channel: 'chromium', headless: true,
+    args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]
+  });
+  context.setDefaultTimeout(30000);
+  await context.route(/^https:\/\/www\.instagram\.com\//, route => route.fulfill({contentType: 'text/html', body: fixture(route.request().url())}));
+  const worker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
+  const id = new URL(worker.url()).host;
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${id}/extension/popup.html`);
+  await popup.locator('#autopilot:not(:disabled)').waitFor();
+  await popup.locator('#autopilotPlatform').selectOption('instagram');
+  const getState = () => worker.evaluate(async () => (await chrome.storage.session.get('autopilot')).autopilot);
+  async function start() {
+    const opened = context.waitForEvent('page');
+    await popup.locator('#autopilot').check();
+    const page = await opened;
+    await popup.locator('#autopilot:not(:disabled)').waitFor();
+    const state = await getState();
+    await page.goto(state.url);
+    return {page, state};
+  }
+  const first = await start();
+  await first.page.waitForURL('**/p/user1a/');
+  await popup.locator('#autopilot').uncheck();
+  const stoppedURL = first.page.url();
+  await first.page.waitForTimeout(1000);
+  assert.equal(first.page.url(), stoppedURL, 'stopping must cancel post navigation');
+  assert.equal((await getState()).running, false);
+  await first.page.close();
+
+  const {page, state} = await start();
+  const visited = [];
+  page.on('framenavigated', frame => { if (frame === page.mainFrame()) visited.push(new URL(frame.url()).pathname); });
+  // Survive an actual document reload midway through the saved profile sequence.
+  await page.waitForURL('**/p/user1a/');
+  await page.reload();
+  await expect.poll(async () => (await getState()).name, {timeout: 30000}).not.toBe(state.name);
+  await popup.locator('#autopilot').uncheck();
+  assert.deepEqual([...new Set(visited.filter(value => /^\/user\d+\/$/.test(value)))],
+    ['/user1/', '/user2/', '/user3/', '/user4/', '/user5/']);
+  for (const user of [1, 3, 4, 5]) {
+    assert.ok(visited.includes(`/p/user${user}a/`), `first post on profile ${user}`);
+    assert.ok(visited.includes(`/reel/user${user}b/`), `second post on profile ${user}`);
+  }
+  assert.ok(!visited.some(value => /user[67]|user\dc|explore|myself/.test(value)), 'only five users and two posts per public profile');
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('engagement')), null);
+  assert.ok(await page.locator('input[placeholder="Search"]').isVisible(), 'return to search after browsing');
+  console.log('Instagram browser checks passed: five users, two posts, private profile skipping, full navigation, SPA modals, reload recovery, stop, and next name.');
+} finally {
+  await context?.close();
+  await rm(temp, {recursive: true, force: true});
+}

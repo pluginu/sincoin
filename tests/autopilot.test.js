@@ -130,13 +130,13 @@ test('Instagram searches every name in the same tab and waits for search before 
   assert.equal(f.alarms.size, 0);
   const sender = {frameId: 0, tab: {id: first.tabId}, url: first.url};
   for (const url of ['https://instagram.com/accounts/login/', 'https://instagram.com.evil.test/', 'http://instagram.com/']) {
-    assert.equal((await f.run('page', {sender: {...sender, url}, searchedName: first.name})).active, false);
+    assert.equal((await f.run('page', {sender: {...sender, url}, token: first.token, searchedName: first.name})).active, false);
   }
   assert.equal(f.alarms.size, 0);
   assert.equal((await f.run('page', {sender})).name, first.name);
-  await f.run('page', {sender, searchedName: 'wrong name'});
+  await f.run('page', {sender, token: first.token, searchedName: 'wrong name'});
   assert.equal(f.alarms.size, 0);
-  await f.run('page', {sender, searchedName: first.name});
+  await f.run('page', {sender, token: first.token, searchedName: first.name});
   assert.equal((await f.run('status')).awaitingSearch, false);
   assert.equal(f.alarms.size, 1);
   f.options.chrome.tabs.update = async (id, data) => {
@@ -149,7 +149,7 @@ test('Instagram searches every name in the same tab and waits for search before 
   assert.equal(next.awaitingSearch, true);
   assert.equal((await f.run('next')).name, 'Angela White');
   await f.run('stop');
-  assert.equal((await f.run('page', {sender, searchedName: first.name})).active, false);
+  assert.equal((await f.run('page', {sender, token: first.token, searchedName: first.name})).active, false);
   assert.equal(f.alarms.size, 0);
 });
 
@@ -157,4 +157,29 @@ test('unknown platforms fail without opening tabs', async () => {
   const f = fixture();
   assert.match((await f.run('start', 'unknown')).error, /Choose Google, X, or Instagram/);
   assert.equal(f.tabs.size, 0);
+});
+
+test('Instagram progress survives worker restart and rejects stale or unauthorized updates', async () => {
+  const f = fixture();
+  const first = await f.run('start', 'instagram');
+  const sender = {frameId: 0, tab: {id: first.tabId}, url: 'https://www.instagram.com/example/'};
+  const progress = {phase: 'viewing', profiles: ['/example'], profileIndex: 0, posts: ['/p/test'], postIndex: 0, since: 123};
+  await f.run('page', {sender, token: first.token, instagramProgress: progress});
+  const resumed = createAutopilot(f.options);
+  assert.deepEqual((await resumed('page', {sender})).instagramProgress, progress);
+  for (const invalidSender of [{...sender, frameId: 1}, {...sender, tab: {id: 999}}]) {
+    await resumed('page', {sender: invalidSender, token: first.token, instagramProgress: {phase: 'done'}});
+    assert.equal((await resumed('status')).name, first.name);
+  }
+  await resumed('page', {sender, token: 'stale', instagramProgress: {phase: 'done'}});
+  assert.equal((await resumed('status')).name, first.name);
+  await resumed('page', {sender, token: first.token, instagramProgress: {phase: 'done'}});
+  const next = await resumed('status');
+  assert.equal(next.name, 'Riley Reid');
+  assert.notEqual(next.token, first.token);
+  assert.equal(next.instagramProgress, undefined);
+  await resumed('page', {sender, token: first.token, instagramProgress: progress});
+  assert.equal((await resumed('status')).instagramProgress, undefined);
+  await resumed('stop');
+  assert.equal((await resumed('page', {sender, token: next.token, instagramProgress: progress})).active, false);
 });

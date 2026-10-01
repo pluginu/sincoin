@@ -5,6 +5,7 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser.mjs",
+    "test:instagram": "node tests/instagram-browser.mjs",
     "test:directory": "node tests/directory-browser.mjs"
   },
   "devDependencies": {
