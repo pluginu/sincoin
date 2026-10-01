@@ -2,6 +2,27 @@ import { compileRule } from './matcher.js';
 const $ = id => document.getElementById(id);
 const hints = {exact: 'Matches a whole word or phrase: “Ann” will not match “Anna”.', contains: 'Matches anywhere in text: “ann” also matches “Joanna”.', starts: 'Matches at the start of a word: “Ang” matches the Ang in Angela.', ends: 'Matches at the end of a word: “ley” matches the ley in Riley.', regex: 'JavaScript expression, without / delimiters. Example: Angela\\s+White. Global + Unicode flags are automatic.'};
 let settings, editing = null;
+function renderAutopilot(state) {
+  $('autopilot').checked = !!state.running;
+  $('autopilotStatus').textContent = state.error || (state.running ? `Now browsing: ${state.name}` : 'Autopilot is off');
+}
+$('autopilot').onchange = async () => {
+  $('autopilot').disabled = true;
+  try {
+    renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: $('autopilot').checked ? 'start' : 'stop'}));
+    const response = await chrome.runtime.sendMessage({type: 'config'});
+    if (response.error) throw new Error(response.error);
+    settings = response.settings; render(); await refreshStatus();
+  } catch (error) { $('autopilotStatus').textContent = error.message; }
+  finally { $('autopilot').disabled = false; }
+};
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'session' && changes.autopilot) renderAutopilot(changes.autopilot.newValue || {});
+  if (area === 'local' && settings) {
+    for (const key of ['enabled', 'includeNames', 'rules']) if (changes[key]) settings[key] = changes[key].newValue;
+    render();
+  }
+});
 function fail(error) { $('error').textContent = error.message; }
 async function persist() { await chrome.storage.local.set(settings); render(); await refreshStatus(); }
 function reset() { editing = null; $('ruleForm').reset(); $('formTitle').textContent = 'Add a rule'; $('save').textContent = 'Add rule'; $('cancel').hidden = true; $('error').textContent = ''; hint(); }
@@ -54,4 +75,6 @@ try {
   if (response.error) throw new Error(response.error);
   settings = response.settings; $('nameCount').textContent = `${response.names.length} names`;
   render(); hint(); await refreshStatus(); setInterval(refreshStatus, 1200);
+  renderAutopilot(await chrome.runtime.sendMessage({type: 'autopilot', action: 'status'}));
+  $('autopilot').disabled = false;
 } catch (error) { fail(error); }

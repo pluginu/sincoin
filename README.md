@@ -25,6 +25,12 @@ For creators, SIN aims to make it easier to be found through searchable profiles
 
 Names are highlighted in gold. The popup shows the number of highlights in the main page; matching frames are highlighted too. Turning the extension off removes highlights from open tabs. You can separately disable the entertainer list and enable, edit, or delete individual custom rules. Changes apply to open pages automatically.
 
+### Autopilot demo
+
+Turn on **Autopilot demo** in the extension popup to browse Google searches for people in the entertainer list. It enables highlighting and the entertainer list, opens a dedicated tab, and searches the next name about every 30 seconds, looping back to the beginning. Matching names in search results use the existing gold highlights. The demo continues with the popup closed; Google receives each search normally.
+
+Switch Autopilot off, close its tab, or disable highlighting/the entertainer list to stop. Stopping leaves the current results open and highlighting enabled. The demo does not resume after restarting Chrome. Chrome may delay the timer while asleep; Google consent, network errors, or CAPTCHA pages may need manual attention. The demo only cycles search pages and does not click result links.
+
 ### Hover profile links
 
 Hover a highlighted entertainer name to open a dark and gold profile card when approved links are available. Move into the card to choose a platform; links open in a new tab without sharing the referring page. Escape, the close button, scrolling the page, or disabling highlighting dismisses the card. Names without approved links keep their ordinary highlighting.

@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtemp, cp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, cp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import {parseNames} from '../extension/matcher.js';
@@ -12,8 +12,13 @@ await cp('entertainer-links.js', path.join(extension, 'entertainer-links.js'));
 await cp('social-platforms.json', path.join(extension, 'social-platforms.json'));
 await cp('manifest.json', path.join(extension, 'manifest.json'));
 await cp('entertainers.txt', path.join(extension, 'entertainers.txt'));
-const server = createServer((req,res) => {res.setHeader('Content-Type','text/html'); res.end('<!doctype html><p>Angela <b>White</b>, Riley Reid, Joanna and Anna.</p><textarea>Angela White</textarea><div contenteditable="true">Riley Reid</div><div hidden>Stoya</div>');});
+const server = createServer((req,res) => {res.setHeader('Content-Type','text/html'); const query = new URL(req.url, 'http://localhost').searchParams.get('q'); if (query) { res.end(`<!doctype html><p>${query.replace(/[<>&]/g, '')}</p>`); return; } res.end('<!doctype html><p>Angela <b>White</b>, Riley Reid, Joanna and Anna.</p><textarea>Angela White</textarea><div contenteditable="true">Riley Reid</div><div hidden>Stoya</div>');});
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+// Point the copied extension at the local search fixture so newly created tabs
+// cannot reach Google before Playwright attaches network interception.
+const searchOrigin = `http://127.0.0.1:${server.address().port}`;
+const autopilotPath = path.join(extension, 'extension/autopilot.js');
+await writeFile(autopilotPath, (await readFile(autopilotPath, 'utf8')).replace('https://www.google.com/search?', `${searchOrigin}/search?`));
 let context;
 try {
   context = await chromium.launchPersistentContext(path.join(temp,'profile'), {channel:'chromium',headless:true,args:[`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});
@@ -85,9 +90,35 @@ try {
   // Removal must propagate from the cache notification with no DOM or settings change.
   await refreshNames(await readFile('entertainers.txt','utf8'));
   await page.waitForFunction(() => CSS.highlights.get('sin-names')?.size === 3, { }, {timeout: 35000});
+  // Exercise the demo against local search fixtures.
+  const demoOpened = context.waitForEvent('page');
+  await popup.locator('#autopilot').check();
+  const demo = await demoOpened;
+  await demo.waitForFunction(() => CSS.highlights.get('sin-names')?.size > 0);
+  const firstSearch = new URL(demo.url()).searchParams.get('q');
+  await popup.locator('#autopilotStatus').filter({hasText: firstSearch}).waitFor();
+  // Accelerate the real alarm to verify background wiring without a 30-second wait.
+  await worker.evaluate(() => chrome.alarms.create('autopilot-next', {when: Date.now() + 100}));
+  await demo.waitForURL(url => url.searchParams.get('q') !== firstSearch);
+  await demo.waitForFunction(() => CSS.highlights.get('sin-names')?.size > 0);
+  await popup.reload();
+  await popup.locator('#autopilot:checked').waitFor();
+  await popup.locator('#autopilot').uncheck();
+  await popup.locator('#autopilotStatus').filter({hasText: 'Autopilot is off'}).waitFor();
+  assert.equal(await worker.evaluate(() => chrome.alarms.get('autopilot-next')), undefined);
+  await demo.close();
+  const secondOpened = context.waitForEvent('page');
+  await popup.locator('#autopilot').check();
+  const secondDemo = await secondOpened;
+  await secondDemo.waitForURL(`${searchOrigin}/search?**`);
+  await secondDemo.waitForFunction(() => CSS.highlights.get('sin-names')?.size > 0);
+  await secondDemo.close();
+  await popup.locator('#autopilotStatus').filter({hasText: 'Autopilot is off'}).waitFor();
   // A pathological expression must be terminated without freezing the browsing page.
+  await popup.locator('#mode').selectOption('regex');
   await popup.locator('#value').fill('(a+)+$');
   await popup.locator('#save').click();
+  await page.bringToFront();
   await page.evaluate(() => {const p = document.createElement('p'); p.textContent = 'a'.repeat(100) + '!'; document.body.append(p);});
   await page.waitForTimeout(2200);
   const status = await popup.evaluate(async () => {
@@ -99,7 +130,7 @@ try {
   assert.equal(await page.evaluate(() => 2 + 2), 4);
   await popup.locator('.rule button').filter({hasText:'Delete'}).click();
   await page.waitForFunction(() => CSS.highlights.get('sin-names')?.size === 3);
-  console.log('Browser checks passed: safe hover profile links, dismissal, full names, inline text, excluded fields, dynamic content, toggle, rule CRUD/persistence, validation, hosted list updates, regex timeout and recovery.');
+  console.log('Browser checks passed: autopilot start/advance/stop/restart/tab closure, safe hover profile links, dismissal, full names, inline text, excluded fields, dynamic content, toggle, rule CRUD/persistence, validation, hosted list updates, regex timeout and recovery.');
 } finally {
   await context?.close();
   await new Promise(resolve => server.close(resolve));
